@@ -159,9 +159,6 @@ function Market() {
               <h2 className="font-semibold">{t("AI Selling Prediction", "AI ಮಾರಾಟ ಮುನ್ಸೂಚನೆ")}</h2>
             </div>
             <div className="flex items-center gap-3">
-              <span className="text-xs text-muted-foreground">
-                {t("Platform Commission: 1.5%", "ವೇದಿಕೆ ಶುಲ್ಕ: 1.5%")}
-              </span>
               <Button className="bg-success text-success-foreground hover:bg-success/90">
                 {t("Sell Crop Now", "ಬೆಳೆ ಈಗ ಮಾರಿ")}
               </Button>

@@ -140,15 +140,14 @@ function OwnerFacilityLanding() {
                 <span className="text-4xl font-black">₹999</span>
                 <span className="text-lg text-muted-foreground">{t("/ month", "/ ತಿಂಗಳು")}</span>
               </div>
-              <p className="mt-4 text-sm text-muted-foreground">{t("Unlimited listings. Zero commission. Full analytics.", "ಅನಿಯಮಿತ ಪಟ್ಟಿಗಳು. ಶೂನ್ಯ ಕಮಿಷನ್. ಸಂಪೂರ್ಣ ವಿಶ್ಲೇಷಣೆ.")}</p>
+              <p className="mt-4 text-sm text-muted-foreground">{t("Unlimited listings. Full analytics.", "ಅನಿಯಮಿತ ಪಟ್ಟಿಗಳು. ಸಂಪೂರ್ಣ ವಿಶ್ಲೇಷಣೆ.")}</p>
               <ul className="mt-6 space-y-3">
                 {[
-                  t("0% Commission on Bookings", "ಬುಕಿಂಗ್ ಮೇಲೆ 0% ಕಮಿಷನ್"),
                   t("Unlimited Facility Listings", "ಅನಿಯಮಿತ ಸೌಲಭ್ಯ ಪಟ್ಟಿಗಳು"),
                   t("Priority Search Ranking", "ಆದ್ಯತೆ ಹುಡುಕಾಟ ಶ್ರೇಣೀಕರಣ"),
                   t("Current Market Insights Access", "ಪ್ರಸ್ತುತ ಮಾರುಕಟ್ಟೆ ಒಳನೋಟ"),
                   t("Predictive Analytics", "ಊಹಾತ್ಮಕ ವಿಶ್ಲೇಷಣೆ"),
-                  t("24/7 Phone Support", "24/7 ಫೋನ್ ಬೆಂಬಲ"),
+                  t("24/7 Chat Support", "24/7 ಚಾಟ್ ಬೆಂಬಲ"),
                 ].map((f) => (
                   <li key={f} className="flex items-center gap-2 text-sm"><CheckCircle2 className="h-4 w-4 text-primary" /> {f}</li>
                 ))}

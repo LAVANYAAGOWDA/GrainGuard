@@ -40,10 +40,10 @@ export function ChatbotWidget() {
             </div>
             <div>
               <div className="text-sm font-semibold">
-                {t("GrainGuard Assistant", "GrainGuard ಸಹಾಯಕ")}
+                {t("GrainGuard Sathi", "GrainGuard ಸಾಥಿ")}
               </div>
               <div className="text-xs text-muted-foreground">
-                {t("Online · Ready to help", "ಆನ್‌ಲೈನ್ · ಸಹಾಯಕ್ಕೆ ಸಿದ್ಧ")}
+                {t("Ready to help", "ಸಹಾಯಕ್ಕೆ ಸಿದ್ಧ")}
               </div>
             </div>
           </div>

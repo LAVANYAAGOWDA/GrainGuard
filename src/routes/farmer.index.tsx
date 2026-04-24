@@ -52,6 +52,7 @@ function FarmerDashboard() {
   const [unit, setUnit] = useState("kg");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [duration, setDuration] = useState("1m");
   const [dateError, setDateError] = useState("");
 
   const validateDates = () => {
@@ -67,6 +68,19 @@ function FarmerDashboard() {
     }
     setDateError("");
     return true;
+  };
+
+  const durationMap: Record<string, number> = { "15d": 15, "1m": 30, "3m": 90, "6m": 180, "1y": 365 };
+
+  const autoFillEndDate = (start: string, dur: string) => {
+    if (!start) return;
+    const s = new Date(start);
+    s.setDate(s.getDate() + (durationMap[dur] || 30));
+    const y = s.getFullYear();
+    const m = String(s.getMonth() + 1).padStart(2, "0");
+    const d = String(s.getDate()).padStart(2, "0");
+    setEndDate(`${y}-${m}-${d}`);
+    setDateError("");
   };
 
   const canSubmit = crops.length > 0 && quantity && startDate && endDate && !dateError;
@@ -179,8 +193,8 @@ function FarmerDashboard() {
             })}
           </div>
 
-          <div className="mt-6 grid gap-4 md:grid-cols-3">
-            <div className="md:col-span-1">
+          <div className="mt-6 grid gap-4 md:grid-cols-4">
+            <div>
               <Label htmlFor="start-date">{t("Start Date", "ಪ್ರಾರಂಭ ದಿನಾಂಕ")}</Label>
               <Input
                 id="start-date"
@@ -189,12 +203,27 @@ function FarmerDashboard() {
                 value={startDate}
                 onChange={(e) => {
                   setStartDate(e.target.value);
-                  setTimeout(validateDates, 0);
+                  autoFillEndDate(e.target.value, duration);
                 }}
               />
             </div>
-            <div className="md:col-span-1">
-              <Label htmlFor="end-date">{t("End Date", "ಮುಕ್ತಾಯ ದಿನಾಂk")}</Label>
+            <div>
+              <Label htmlFor="duration">{t("Duration", "ಅವಧಿ")}</Label>
+              <Select value={duration} onValueChange={(v) => { setDuration(v); autoFillEndDate(startDate, v); }}>
+                <SelectTrigger id="duration" className="mt-1.5 h-12">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="15d">{t("15 days", "15 ದಿನ")}</SelectItem>
+                  <SelectItem value="1m">{t("1 month", "1 ತಿಂಗಳು")}</SelectItem>
+                  <SelectItem value="3m">{t("3 months", "3 ತಿಂಗಳು")}</SelectItem>
+                  <SelectItem value="6m">{t("6 months", "6 ತಿಂಗಳು")}</SelectItem>
+                  <SelectItem value="1y">{t("1 year", "1 ವರ್ಷ")}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="end-date">{t("End Date", "ಮುಕ್ತಾಯ ದಿನಾಂಕ")}</Label>
               <Input
                 id="end-date"
                 type="date"

@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
   Boxes,
   TrendingUp,
@@ -14,6 +14,10 @@ import {
   Clock,
   Warehouse,
   Wheat,
+  Pencil,
+  X,
+  Crown,
+  IndianRupee,
 } from "lucide-react";
 import { PageShell } from "@/components/PageShell";
 import { cn } from "@/lib/utils";
@@ -35,9 +39,14 @@ export const Route = createFileRoute("/owner/")({
 });
 
 function OwnerDashboard() {
-  const { t, ownerStorages } = useApp();
+  const { t, ownerStorages, user } = useApp();
+  const navigate = useNavigate();
+  const isPrime = user?.membership === "Prime";
   const aggregateCapacity = ownerStorages.reduce((s, f) => s + f.capacity, 0) || 1000;
   const [totalCapacity] = useState(aggregateCapacity);
+  const [capacityModalOpen, setCapacityModalOpen] = useState(false);
+  const [paymentPopupOpen, setPaymentPopupOpen] = useState(false);
+  const [paymentProcessing, setPaymentProcessing] = useState(false);
   const [occupied, setOccupied] = useState(0);
   const [bookings, setBookings] = useState<Array<{
     id: string;
@@ -124,59 +133,33 @@ function OwnerDashboard() {
                 {t("All Bookings", "ಎಲ್ಲ ಬುಕಿಂಗ್")}
               </Link>
             </Button>
-            <Button asChild className="gap-1.5">
-              <Link to="/owner/add">
-                <Plus className="h-4 w-4" />
-                {ownerStorages.length > 0
-                  ? t("+ Add Another Storage", "+ ಮತ್ತೊಂದು ಸಂಗ್ರಹಣೆ")
-                  : t("Add Storage", "ಸಂಗ್ರಹಣೆ ಸೇರಿಸಿ")}
-              </Link>
+            <Button
+              className="gap-1.5"
+              onClick={() => {
+                if (isPrime || ownerStorages.length === 0) {
+                  navigate({ to: "/owner/add" });
+                } else {
+                  setPaymentPopupOpen(true);
+                }
+              }}
+            >
+              <Plus className="h-4 w-4" />
+              {t("Add Storage", "ಸಂಗ್ರಹಣೆ ಸೇರಿಸಿ")}
             </Button>
           </div>
         </div>
 
-        {/* Interactive Capacity Manager */}
-        <div className="mt-6 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)]">
-          <div className="flex items-center justify-between">
-            <h2 className="font-semibold">
-              {t("Live Capacity Manager", "ಲೈವ್ ಸಾಮರ್ಥ್ಯ ನಿರ್ವಾಹಕ")}
-            </h2>
-            <span className="text-xs text-muted-foreground">
-              {t("Drag slider or use +/- to adjust", "ಸ್ಲೈಡರ್ ಎಳೆಯಿರಿ ಅಥವಾ +/- ಬಳಸಿ")}
-            </span>
+        {/* Capacity summary bar (replaces static manager) */}
+        <div className="mt-6 rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-soft)]">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">{t("Occupied", "ಆಕ್ರಮಿತ")}</span>
+            <span className="font-semibold">{occupied} / {totalCapacity} kg</span>
           </div>
-          <div className="mt-4">
-            <div className="mb-2 flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">{t("Total occupied", "ಒಟ್ಟು ಆಕ್ರಮಿತ")}</span>
-              <span className="font-semibold">{occupied} / {totalCapacity} kg</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={() => setOccupied((v) => Math.max(0, v - 50))}
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border bg-muted text-sm font-bold transition-colors hover:bg-primary-soft"
-              >−</button>
-              <input
-                type="range"
-                min={0}
-                max={totalCapacity}
-                step={10}
-                value={occupied}
-                onChange={(e) => setOccupied(Number(e.target.value))}
-                className="w-full accent-primary"
-              />
-              <button
-                type="button"
-                onClick={() => setOccupied((v) => Math.min(totalCapacity, v + 50))}
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border bg-muted text-sm font-bold transition-colors hover:bg-primary-soft"
-              >+</button>
-            </div>
-            <div className="mt-2 h-3 w-full overflow-hidden rounded-full bg-muted">
-              <div
-                className={cn("h-full rounded-full transition-all", occupied / totalCapacity > 0.85 ? "bg-destructive" : occupied / totalCapacity > 0.6 ? "bg-warning" : "bg-primary")}
-                style={{ width: `${totalCapacity > 0 ? (occupied / totalCapacity) * 100 : 0}%` }}
-              />
-            </div>
+          <div className="mt-2 h-3 w-full overflow-hidden rounded-full bg-muted">
+            <div
+              className={cn("h-full rounded-full transition-all", occupied / totalCapacity > 0.85 ? "bg-destructive" : occupied / totalCapacity > 0.6 ? "bg-warning" : "bg-primary")}
+              style={{ width: `${totalCapacity > 0 ? (occupied / totalCapacity) * 100 : 0}%` }}
+            />
           </div>
         </div>
 
@@ -336,6 +319,102 @@ function OwnerDashboard() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Floating Action Button — Capacity Manager */}
+      <button
+        type="button"
+        onClick={() => setCapacityModalOpen(true)}
+        aria-label="Open Capacity Manager"
+        className="fixed bottom-24 right-5 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-[var(--shadow-elevated)] transition-all hover:scale-110 active:scale-95"
+      >
+        <Pencil className="h-5 w-5" />
+      </button>
+
+      {/* Capacity Manager Modal */}
+      {capacityModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="w-full max-w-md rounded-2xl bg-card p-6 shadow-2xl border border-border">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold flex items-center gap-2">
+                <Boxes className="h-5 w-5 text-primary" />
+                {t("Live Capacity Manager", "ಲೈವ್ ಸಾಮರ್ಥ್ಯ ನಿರ್ವಾಹಕ")}
+              </h2>
+              <button type="button" onClick={() => setCapacityModalOpen(false)} className="rounded-md p-1 text-muted-foreground hover:bg-muted">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <p className="mt-1 text-xs text-muted-foreground">{t("Drag slider or use +/- to adjust", "ಸ್ಲೈಡರ್ ಎಳೆಯಿರಿ ಅಥವಾ +/- ಬಳಸಿ")}</p>
+            <div className="mt-5">
+              <div className="mb-2 flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">{t("Occupied", "ಆಕ್ರಮಿತ")}</span>
+                <span className="font-semibold">{occupied} / {totalCapacity} kg</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <button type="button" onClick={() => setOccupied((v) => Math.max(0, v - 50))} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border bg-muted text-sm font-bold hover:bg-primary-soft">−</button>
+                <input type="range" min={0} max={totalCapacity} step={10} value={occupied} onChange={(e) => setOccupied(Number(e.target.value))} className="w-full accent-primary" />
+                <button type="button" onClick={() => setOccupied((v) => Math.min(totalCapacity, v + 50))} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border bg-muted text-sm font-bold hover:bg-primary-soft">+</button>
+              </div>
+              <div className="mt-3 h-3 w-full overflow-hidden rounded-full bg-muted">
+                <div className={cn("h-full rounded-full transition-all", occupied / totalCapacity > 0.85 ? "bg-destructive" : occupied / totalCapacity > 0.6 ? "bg-warning" : "bg-primary")} style={{ width: `${totalCapacity > 0 ? (occupied / totalCapacity) * 100 : 0}%` }} />
+              </div>
+            </div>
+            <Button className="mt-5 w-full" onClick={() => setCapacityModalOpen(false)}>
+              {t("Save & Close", "ಉಳಿಸಿ ಮತ್ತು ಮುಚ್ಚಿ")}
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* ₹159 Payment Popup for Basic Users */}
+      {paymentPopupOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="w-full max-w-sm rounded-2xl bg-card p-6 shadow-2xl border border-border">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold flex items-center gap-2">
+                <IndianRupee className="h-5 w-5 text-primary" />
+                {t("Payment", "ಪಾವತಿ")}
+              </h2>
+              <button type="button" onClick={() => { setPaymentPopupOpen(false); setPaymentProcessing(false); }} className="rounded-md p-1 text-muted-foreground hover:bg-muted">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {t("Pay the listing fee to add a new storage facility.", "ಹೊಸ ಸಂಗ್ರಹಣಾ ಸೌಲಭ್ಯ ಸೇರಿಸಲು ಪಟ್ಟಿ ಶುಲ್ಕ ಪಾವತಿಸಿ.")}
+            </p>
+            <div className="mt-5 rounded-2xl border border-primary/20 bg-primary/5 p-5 text-center">
+              <div className="text-sm font-semibold text-muted-foreground mb-1">{t("Listing Fee", "ಪಟ್ಟಿ ಶುಲ್ಕ")}</div>
+              <div className="text-4xl font-black text-primary">₹159</div>
+              <div className="mt-1 text-xs text-muted-foreground">{t("One-time per facility", "ಪ್ರತಿ ಸೌಲಭ್ಯಕ್ಕೆ ಒಂದು ಬಾರಿ")}</div>
+            </div>
+            <div className="mt-4 space-y-1.5">
+              {[t("Secure Escrow", "ಸುರಕ್ಷಿತ ಎಸ್ಕ್ರೋ"), t("Verified Bookings", "ಪರಿಶೀಲಿತ ಬುಕಿಂಗ್"), t("Standard Support", "ಸ್ಟ್ಯಾಂಡರ್ಡ್ ಬೆಂಬಲ")].map((f) => (
+                <div key={f} className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <CheckCircle2 className="h-3 w-3 text-success" /> {f}
+                </div>
+              ))}
+            </div>
+            <Button
+              size="lg"
+              className="mt-5 h-12 w-full text-base"
+              disabled={paymentProcessing}
+              onClick={() => {
+                setPaymentProcessing(true);
+                setTimeout(() => {
+                  setPaymentPopupOpen(false);
+                  setPaymentProcessing(false);
+                  navigate({ to: "/owner/add" });
+                }, 1500);
+              }}
+            >
+              {paymentProcessing ? t("Processing...", "ಪ್ರಕ್ರಿಯೆಯಲ್ಲಿದೆ...") : t("Pay ₹159 & Continue", "₹159 ಪಾವತಿಸಿ ಮತ್ತು ಮುಂದುವರಿಸಿ")}
+            </Button>
+            <div className="mt-3 flex items-center justify-center gap-1 text-[11px] text-muted-foreground">
+              <ShieldCheck className="h-3.5 w-3.5 text-success" />
+              {t("Secured payment gateway", "ಸುರಕ್ಷಿತ ಪಾವತಿ ಗೇಟ್‌ವೇ")}
+            </div>
+          </div>
+        </div>
+      )}
     </PageShell>
   );
 }

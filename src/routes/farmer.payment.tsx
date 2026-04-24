@@ -305,7 +305,7 @@ function Payment() {
               {search.ref && <Row label={t("Reference", "ಉಲ್ಲೇಖ")} value={search.ref} />}
               <div className="my-2 border-t border-border" />
               <Row label={t("Subtotal", "ಉಪಮೊತ್ತ")} value={`₹${subtotal.toLocaleString()}`} />
-              <Row label={t("Platform fee", "ವೇದಿಕೆ ಶುಲ್ಕ")} value={`₹${fee.toLocaleString()}`} />
+              <Row label={t("Service fee", "ಸೇವಾ ಶುಲ್ಕ")} value={`₹${fee.toLocaleString()}`} />
               <div className="my-2 border-t border-border" />
               <Row label={t("Total", "ಒಟ್ಟು")} value={`₹${total.toLocaleString()}`} bold />
             </div>

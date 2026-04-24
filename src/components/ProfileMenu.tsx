@@ -11,6 +11,7 @@ import {
   Crown,
 } from "lucide-react";
 import { useApp } from "@/lib/app-context";
+import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -61,7 +62,12 @@ export function ProfileMenu({ onItemClick }: { onItemClick?: () => void }) {
           <button
             type="button"
             aria-label="Profile menu"
-            className="flex items-center justify-center rounded-full border border-border bg-card p-0.5 transition-all hover:border-primary hover:shadow-[var(--shadow-soft)]"
+            className={cn(
+              "flex items-center justify-center rounded-full border bg-card p-0.5 transition-all hover:shadow-[var(--shadow-soft)]",
+              role === "owner" && user.membership === "Prime"
+                ? "border-2 border-amber-400 hover:border-amber-500 ring-2 ring-amber-400/30"
+                : "border-border hover:border-primary",
+            )}
           >
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-soft text-xs font-bold text-foreground">
               {user.photo ? (

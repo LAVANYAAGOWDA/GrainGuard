@@ -50,12 +50,14 @@ export function Navbar() {
       ? [
           { to: "/owner", label: t("Dashboard", "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್"), icon: Warehouse },
           { to: "/owner/bookings", label: t("Bookings", "ಬುಕಿಂಗ್"), icon: TrendingUp },
+          { to: "/owner/market-insights", label: t("Market Insights", "ಮಾರುಕಟ್ಟೆ ಒಳನೋಟ"), icon: BarChart3 },
+          { to: "/owner/contact", label: t("Contact Us", "ಸಂಪರ್ಕಿಸಿ"), icon: Phone },
         ]
       : [
           { to: "/farmer/active", label: t("My Storage", "ನನ್ನ ಸಂಗ್ರಹಣೆ"), icon: Home },
           { to: "/farmer/payment", label: t("Payment", "ಪಾವತಿ"), icon: TrendingUp },
           { to: "/farmer/insights", label: t("Market Insights", "ಮಾರುಕಟ್ಟೆ ಒಳನೋಟ"), icon: BarChart3 },
-          { to: "/#contact", label: t("Contact Us", "ಸಂಪರ್ಕಿಸಿ"), icon: Phone, isAnchor: true },
+          { to: "/farmer/contact", label: t("Contact Us", "ಸಂಪರ್ಕಿಸಿ"), icon: Phone },
         ]
     : isFarmerLanding
       ? [
@@ -140,6 +142,15 @@ export function Navbar() {
               )}
               {role === "farmer" && (
                 <Link to="/farmer/alerts" className="relative rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
+                  <Bell className="h-4 w-4" />
+                  <span className="absolute -top-0.5 -right-0.5 flex h-2.5 w-2.5">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-destructive opacity-60" />
+                    <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-destructive" />
+                  </span>
+                </Link>
+              )}
+              {role === "owner" && (
+                <Link to="/owner/bookings" className="relative rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
                   <Bell className="h-4 w-4" />
                   <span className="absolute -top-0.5 -right-0.5 flex h-2.5 w-2.5">
                     <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-destructive opacity-60" />

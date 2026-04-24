@@ -5,13 +5,15 @@ import {
   ArrowRight,
   Sprout,
   Lock,
-  ThermometerSnowflake,
+  CalendarDays,
   CheckCircle2,
   TrendingUp,
   Star,
   Quote,
   ChevronLeft,
   ChevronRight,
+  BarChart3,
+  MessageSquare,
 } from "lucide-react";
 import { PageShell } from "@/components/PageShell";
 import { Button } from "@/components/ui/button";
@@ -49,7 +51,9 @@ function Landing() {
   const [getStartedOpen, setGetStartedOpen] = useState(false);
 
   const [escrowOpen, setEscrowOpen] = useState(false);
-  const [climateOpen, setClimateOpen] = useState(false);
+  const [dateBookingOpen, setDateBookingOpen] = useState(false);
+  const [insightsOpen, setInsightsOpen] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
   const [currentReview, setCurrentReview] = useState(0);
 
   const reviews = [
@@ -90,12 +94,12 @@ function Landing() {
               {t("Trusted by farmers", "ರೈತರಿಂದ ವಿಶ್ವಾಸಾರ್ಹ")}
             </span>
             <h1 className="mt-4 text-4xl font-black leading-tight text-[#1C2216] md:text-5xl lg:text-6xl tracking-tight">
-              {t("Revolutionizing Post-Harvest Storage for India's Farmers", "ಭಾರತದ ರೈತರಿಗೆ ಸುಗ್ಗಿಯ ನಂತರದ ಸಂಗ್ರಹಣೆಯನ್ನು ಕ್ರಾಂತಿಕಾರಿಗೊಳಿಸುವುದು")}
+              {t("Secure, Peer-to-Peer Grain Storage.", "ಸುರಕ್ಷಿತ, ಪಿಯರ್-ಟು-ಪಿಯರ್ ಧಾನ್ಯ ಸಂಗ್ರಹಣೆ.")}
             </h1>
             <p className="mt-4 max-w-lg text-lg text-[#5A6B52] font-medium">
               {t(
-                "Find safe, verified storage facilities. Protect every payment with secure escrow. AI-powered monitoring keeps your grain safe 24/7.",
-                "ಸುರಕ್ಷಿತ, ಪರಿಶೀಲಿಸಿದ ಸಂಗ್ರಹಣಾ ಸೌಲಭ್ಯಗಳನ್ನು ಹುಡುಕಿ. ಸುರಕ್ಷಿತ ಎಸ್ಕ್ರೋದೊಂದಿಗೆ ಪ್ರತಿ ಪಾವತಿಯನ್ನು ರಕ್ಷಿಸಿ."
+                "GrainGuard connects farmers directly with verified local storage owners. Book space, lock in your capacity, and protect your harvest with our secure escrow payment system. Full transparency.",
+                "GrainGuard ರೈತರನ್ನು ನೇರವಾಗಿ ಪರಿಶೀಲಿತ ಸ್ಥಳೀಯ ಸಂಗ್ರಹಣಾ ಮಾಲೀಕರೊಂದಿಗೆ ಸಂಪರ್ಕಿಸುತ್ತದೆ. ಸ್ಥಳ ಬುಕ್ ಮಾಡಿ, ನಿಮ್ಮ ಪಸಲನ್ನು ಸುರಕ್ಷಿತ ಎಸ್ಕ್ರೋ ಪಾವತಿ ವ್ಯವಸ್ಥೆಯೊಂದಿಗೆ ರಕ್ಷಿಸಿ. ಸಂಪೂರ್ಣ ಪಾರದರ್ಶಕತೆ."
               )}
             </p>
             <div className="mt-8 flex flex-wrap gap-4">
@@ -134,16 +138,44 @@ function Landing() {
               </div>
             </button>
             <button 
-              onClick={() => setClimateOpen(true)}
+              onClick={() => setDateBookingOpen(true)}
               className="flex items-start gap-4 rounded-2xl border border-[#9CAF88]/20 bg-white/60 p-6 text-left shadow-[var(--shadow-soft)] backdrop-blur transition-all hover:-translate-y-1 hover:border-primary/50 hover:shadow-[var(--shadow-elevated)]"
             >
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary">
-                <ThermometerSnowflake className="h-6 w-6" />
+                <CalendarDays className="h-6 w-6" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-[#1C2216]">{t("Climate Control", "ಹವಾಮಾನ ನಿಯಂತ್ರಣ")}</h3>
+                <h3 className="text-lg font-bold text-[#1C2216]">{t("Flexible Date Booking", "ಹೊಂದಿಕೊಳ್ಳುವ ದಿನಾಂಕ ಬುಕಿಂಗ್")}</h3>
                 <p className="mt-1 text-sm text-[#5A6B52]">
-                  {t("Real-time temperature monitoring.", "ನೈಜ-ಸಮಯದ ತಾಪಮಾನ ಮೇಲ್ವಿಚಾರಣೆ.")}
+                  {t("Choose 15 days to 1 year duration.", "15 ದಿನದಿಂದ 1 ವರ್ಷದ ಅವಧಿ ಆರಿಸಿ.")}
+                </p>
+              </div>
+            </button>
+            <button 
+              onClick={() => setInsightsOpen(true)}
+              className="flex items-start gap-4 rounded-2xl border border-[#9CAF88]/20 bg-white/60 p-6 text-left shadow-[var(--shadow-soft)] backdrop-blur transition-all hover:-translate-y-1 hover:border-primary/50 hover:shadow-[var(--shadow-elevated)]"
+            >
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-warning/15 text-warning-foreground">
+                <BarChart3 className="h-6 w-6" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-[#1C2216]">{t("Market Insights", "ಮಾರುಕಟ್ಟೆ ಒಳನೋಟ")}</h3>
+                <p className="mt-1 text-sm text-[#5A6B52]">
+                  {t("Data-driven crop & pricing trends.", "ಡೇಟಾ-ಆಧಾರಿತ ಬೆಳೆ ಮತ್ತು ಬೆಲೆ ಪ್ರವೃತ್ತಿಗಳು.")}
+                </p>
+              </div>
+            </button>
+            <button 
+              onClick={() => setChatOpen(true)}
+              className="flex items-start gap-4 rounded-2xl border border-[#9CAF88]/20 bg-white/60 p-6 text-left shadow-[var(--shadow-soft)] backdrop-blur transition-all hover:-translate-y-1 hover:border-primary/50 hover:shadow-[var(--shadow-elevated)]"
+            >
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#9CAF88]/15 text-[#6B8A5E]">
+                <MessageSquare className="h-6 w-6" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-[#1C2216]">{t("Smart Chat Assistant", "ಸ್ಮಾರ್ಟ್ ಚಾಟ್ ಸಹಾಯಕ")}</h3>
+                <p className="mt-1 text-sm text-[#5A6B52]">
+                  {t("Instant help & storage guidance.", "ತಕ್ಷಣ ಸಹಾಯ ಮತ್ತು ಸಂಗ್ರಹಣಾ ಮಾರ್ಗದರ್ಶನ.")}
                 </p>
               </div>
             </button>
@@ -159,20 +191,46 @@ function Landing() {
               <Lock className="h-5 w-5 text-success" /> {t("Secure Escrow", "ಸುರಕ್ಷಿತ ಎಸ್ಕ್ರೋ")}
             </DialogTitle>
             <DialogDescription className="pt-4 text-base">
-              {t("Your money is held in a secure RBI-regulated nodal account. It is only released to the storage owner once you confirm your grain has been safely deposited.", "ನಿಮ್ಮ ಹಣವನ್ನು ಸುರಕ್ಷಿತ ಖಾತೆಯಲ್ಲಿ ಇಡಲಾಗುತ್ತದೆ. ಧಾನ್ಯಗಳನ್ನು ಸುರಕ್ಷಿತವಾಗಿ ಜಮೆ ಮಾಡಿದ ನಂತರವೇ ಮಾಲೀಕರಿಗೆ ಬಿಡುಗಡೆ ಮಾಡಲಾಗುತ್ತದೆ.")}
+              {t("Your money is held in a secure escrow account. It is only released to the storage owner once you confirm your grain has been safely deposited.", "ನಿಮ್ಮ ಹಣವನ್ನು ಸುರಕ್ಷಿತ ಖಾತೆಯಲ್ಲಿ ಇಡಲಾಗುತ್ತದೆ. ಧಾನ್ಯಗಳನ್ನು ಸುರಕ್ಷಿತವಾಗಿ ಜಮೆ ಮಾಡಿದ ನಂತರವೇ ಮಾಲೀಕರಿಗೆ ಬಿಡುಗಡೆ ಮಾಡಲಾಗುತ್ತದೆ.")}
             </DialogDescription>
           </DialogHeader>
         </DialogContent>
       </Dialog>
 
-      <Dialog open={climateOpen} onOpenChange={setClimateOpen}>
+      <Dialog open={dateBookingOpen} onOpenChange={setDateBookingOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <ThermometerSnowflake className="h-5 w-5 text-primary" /> {t("Climate Control", "ಹವಾಮಾನ ನಿಯಂತ್ರಣ")}
+              <CalendarDays className="h-5 w-5 text-primary" /> {t("Flexible Date Booking", "ಹೊಂದಿಕೊಳ್ಳುವ ದಿನಾಂಕ ಬುಕಿಂಗ್")}
             </DialogTitle>
             <DialogDescription className="pt-4 text-base">
-              {t("Premium storage facilities use IoT sensors to monitor temperature and humidity 24/7. You receive instant alerts if conditions drop below optimal levels.", "ಪ್ರೀಮಿಯಂ ಸೌಲಭ್ಯಗಳು ತಾಪಮಾನವನ್ನು ನಿಯಂತ್ರಿಸುತ್ತವೆ. ವ್ಯತ್ಯಾಸವಾದರೆ ನಿಮಗೆ ತಕ್ಷಣ ಎಚ್ಚರಿಕೆ ಬರುತ್ತದೆ.")}
+              {t("Book storage for any duration from 15 days up to 1 full year. Pick a start date, choose your duration, and GrainGuard auto-calculates the end date. You can adjust dates manually too — we just enforce a 15-day minimum.", "ಸಂಗ್ರಹಣೆಯನ್ನು 15 ದಿನದಿಂದ 1 ವರ್ಷದವರೆಗೆ ಯಾವುದೇ ಅವಧಿಗೆ ಬುಕ್ ಮಾಡಿ. ಪ್ರಾರಂಭ ದಿನಾಂಕ ಆರಿಸಿ, ಅವಧಿ ಆರಿಸಿ, GrainGuard ಮುಕ್ತಾಯ ದಿನಾಂಕ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಲೆಕ್ಕಿಸುತ್ತದೆ.")}
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={insightsOpen} onOpenChange={setInsightsOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <BarChart3 className="h-5 w-5 text-warning-foreground" /> {t("Market Insights", "ಮಾರುಕಟ್ಟೆ ಒಳನೋಟ")}
+            </DialogTitle>
+            <DialogDescription className="pt-4 text-base">
+              {t("Access real-time crop demand forecasts, competitor pricing data, and seasonal storage trends. Prime owners get exclusive analytics to maximize their facility utilization and revenue.", "ನೈಜ-ಸಮಯದ ಬೆಳೆ ಬೇಡಿಕೆ ಮುನ್ಸೂಚನೆ, ಪ್ರತಿಸ್ಪರ್ಧಿ ಬೆಲೆ ಮಾಹಿತಿ, ಮತ್ತು ಋತುಮಾನ ಸಂಗ್ರಹಣಾ ಪ್ರವೃತ್ತಿಗಳನ್ನು ಪ್ರವೇಶಿಸಿ.")}
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={chatOpen} onOpenChange={setChatOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MessageSquare className="h-5 w-5 text-[#6B8A5E]" /> {t("Smart Chat Assistant", "ಸ್ಮಾರ್ಟ್ ಚಾಟ್ ಸಹಾಯಕ")}
+            </DialogTitle>
+            <DialogDescription className="pt-4 text-base">
+              {t("Our GrainGuard Assistant is available 24/7 to help you find storage, understand pricing, track your bookings, and resolve any disputes — all within the chat window.", "ನಮ್ಮ GrainGuard ಸಹಾಯಕ ನಿಮಗೆ ಸಂಗ್ರಹಣೆ ಹುಡುಕಲು, ಬೆಲೆ ತಿಳಿಯಲು, ಬುಕಿಂಗ್ ಟ್ರ್ಯಾಕ್ ಮಾಡಲು ಮತ್ತು ವಿವಾದಗಳನ್ನು ಪರಿಹರಿಸಲು 24/7 ಲಭ್ಯವಿದೆ.")}
             </DialogDescription>
           </DialogHeader>
         </DialogContent>
@@ -230,8 +288,8 @@ function Landing() {
           <h2 className="text-3xl font-black md:text-4xl text-foreground tracking-tight">{t("Our Mission", "ನಮ್ಮ ಗುರಿ")}</h2>
           <p className="mt-6 text-lg md:text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto">
             {t(
-              "GrainGuard is built to empower Indian agriculture by eliminating harvest wastage and providing transparent, secure storage solutions. We bridge the trust gap between farmers and facility owners using real-time IoT monitoring and RBI-regulated escrow payments.",
-              "ಸುಗ್ಗಿಯ ವ್ಯರ್ಥವನ್ನು ತೆಗೆದುಹಾಕುವ ಮೂಲಕ ಮತ್ತು ಪಾರದರ್ಶಕ, ಸುರಕ್ಷಿತ ಸಂಗ್ರಹಣಾ ಪರಿಹಾರಗಳನ್ನು ಒದಗಿಸುವ ಮೂಲಕ ಭಾರತೀಯ ಕೃಷಿಯನ್ನು ಸಬಲೀಕರಣಗೊಳಿಸಲು GrainGuard ಅನ್ನು ನಿರ್ಮಿಸಲಾಗಿದೆ."
+              "GrainGuard is built to empower Indian agriculture by reducing harvest wastage and providing transparent, secure storage solutions. We bridge the trust gap between farmers and facility owners through a simple, secure platform and safe payment holds.",
+              "GrainGuard ಅನ್ನು ಸುಗ್ಗಿಯ ವ್ಯರ್ಥವನ್ನು ಕಡಿಮೆ ಮಾಡುವ ಮೂಲಕ ಮತ್ತು ಪಾರದರ್ಶಕ, ಸುರಕ್ಷಿತ ಸಂಗ್ರಹಣಾ ಪರಿಹಾರಗಳನ್ನು ಒದಗಿಸುವ ಮೂಲಕ ಭಾರತೀಯ ಕೃಷಿಯನ್ನು ಸಬಲೀಕರಣಗೊಳಿಸಲು ನಿರ್ಮಿಸಲಾಗಿದೆ."
             )}
           </p>
         </div>
@@ -413,9 +471,9 @@ function Landing() {
                 <div className="mt-3 flex items-baseline text-4xl font-black">
                   ₹999 <span className="ml-2 text-lg font-medium text-muted-foreground">{t("/ month", "/ ತಿಂಗಳು")}</span>
                 </div>
-                <p className="mt-3 text-sm text-muted-foreground">{t("Unlimited listings. Zero commission. Full Market Insights.", "ಅನಿಯಮಿತ ಪಟ್ಟಿಗಳು. ಶೂನ್ಯ ಕಮಿಷನ್. ಸಂಪೂರ್ಣ ಮಾರುಕಟ್ಟೆ ಒಳನೋಟ.")}</p>
+                <p className="mt-3 text-sm text-muted-foreground">{t("Unlimited listings. Full Market Insights.", "ಅನಿಯಮಿತ ಪಟ್ಟಿಗಳು. ಸಂಪೂರ್ಣ ಮಾರುಕಟ್ಟೆ ಒಳನೋಟ.")}</p>
                 <ul className="mt-6 space-y-3">
-                  {["0% Commission", "Market Insights Access", "Priority Search Ranking", "24/7 Phone Support"].map((f) => (
+                  {["Market Insights Access", "Priority Search Ranking", "Unlimited Listings", "24/7 Chat Support"].map((f) => (
                     <li key={f} className="flex items-center gap-2 text-sm">
                       <CheckCircle2 className="h-4 w-4 text-primary" /> {f}
                     </li>

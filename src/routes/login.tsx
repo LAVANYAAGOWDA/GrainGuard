@@ -199,7 +199,7 @@ function Login() {
                   )}>
                     <input type="radio" className="sr-only" checked={ownerPlan === "Prime"} onChange={() => { setOwnerPlan("Prime"); setSelectedPlan("Prime"); }} />
                     <div className="font-bold text-primary flex items-center gap-1"><Crown className="h-3.5 w-3.5" /> Prime</div>
-                    <div className="text-xs mt-1">₹999/mo · 0% {t("commission", "ಕಮಿಷನ್")}</div>
+                    <div className="text-xs mt-1">₹999/mo · {t("Full Access", "ಸಂಪೂರ್ಣ ಪ್ರವೇಶ")}</div>
                   </label>
                 </div>
               </div>
@@ -273,7 +273,7 @@ function Login() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <IndianRupee className="h-5 w-5 text-primary" />
-              {t("Platform Fee Payment", "ಪ್ಲಾಟ್‌ಫಾರ್ಮ್ ಶುಲ್ಕ ಪಾವತಿ")}
+              {t("Payment", "ಪಾವತಿ")}
             </DialogTitle>
             <DialogDescription>
               {ownerPlan === "Prime"
@@ -297,7 +297,7 @@ function Login() {
 
             <div className="mt-6 space-y-2">
               {(ownerPlan === "Prime"
-                ? ["Unlimited listings", "0% commission", "Market Insights", "Priority ranking"]
+                ? ["Unlimited listings", "Market Insights", "Priority ranking", "24/7 Chat Support"]
                 : ["1 facility listing", "Standard support", "Escrow protection"]
               ).map((f) => (
                 <div key={f} className="flex items-center gap-2 text-sm">
@@ -315,7 +315,7 @@ function Login() {
             </Button>
             <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
               <ShieldCheck className="h-3.5 w-3.5 text-success" />
-              {t("Secured by RBI-regulated payment gateway", "RBI-ನಿಯಂತ್ರಿತ ಪಾವತಿ ಗೇಟ್‌ವೇ ಮೂಲಕ ಸುರಕ್ಷಿತ")}
+              {t("Secured payment gateway", "ಸುರಕ್ಷಿತ ಪಾವತಿ ಗೇಟ್‌ವೇ")}
             </div>
           </DialogFooter>
         </DialogContent>

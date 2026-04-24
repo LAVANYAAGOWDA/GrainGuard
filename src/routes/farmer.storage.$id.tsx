@@ -73,8 +73,8 @@ function StorageDetail() {
       navigate({ to: "/farmer" });
       return;
     }
-    const t = setInterval(() => setLockSeconds((s) => Math.max(0, s - 1)), 1000);
-    return () => clearInterval(t);
+    const timer = setInterval(() => setLockSeconds((s) => Math.max(0, s - 1)), 1000);
+    return () => clearInterval(timer);
   }, [lockSeconds, navigate]);
 
   if (!storage) {

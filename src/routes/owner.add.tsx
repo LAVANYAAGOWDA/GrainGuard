@@ -152,26 +152,33 @@ function AddStorage() {
 
           <div>
             <Label className="mb-2 block">{t("Accepted crops", "ಸ್ವೀಕರಿಸುವ ಬೆಳೆಗಳು")}</Label>
-            <div className="flex flex-wrap gap-2">
-              {CROPS.map((c) => {
-                const active = selected.includes(c);
-                return (
-                  <button
-                    key={c}
-                    type="button"
-                    onClick={() => toggle(c)}
-                    className={cn(
-                      "rounded-full border-2 px-4 py-2 text-sm font-medium capitalize transition-all",
-                      active
-                        ? "border-primary bg-primary text-primary-foreground"
-                        : "border-border bg-background hover:border-primary/50",
-                    )}
-                  >
+            {/* Selected chips */}
+            {selected.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mb-2">
+                {selected.map((c) => (
+                  <span key={c} className="inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-xs font-medium capitalize text-primary-foreground">
                     {c}
-                  </button>
-                );
-              })}
-            </div>
+                    <button type="button" onClick={() => toggle(c)} className="ml-0.5 rounded-full hover:bg-primary-foreground/20 p-0.5" aria-label={`Remove ${c}`}>
+                      ×
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+            {/* Dropdown to add crops */}
+            <Select
+              value=""
+              onValueChange={(v) => { if (v && !selected.includes(v)) toggle(v); }}
+            >
+              <SelectTrigger className="h-12">
+                <SelectValue placeholder={t("Select crops to accept...", "ಸ್ವೀಕರಿಸಲು ಬೆಳೆಗಳನ್ನು ಆಯ್ಕೆ ಮಾಡಿ...")} />
+              </SelectTrigger>
+              <SelectContent>
+                {CROPS.filter((c) => !selected.includes(c)).map((c) => (
+                  <SelectItem key={c} value={c} className="capitalize">{c}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div>
@@ -181,12 +188,12 @@ function AddStorage() {
                 {t("Best crop to store (recommended)", "ಸಂಗ್ರಹಿಸಲು ಉತ್ತಮ ಬೆಳೆ")}
               </span>
             </Label>
-            <Select>
+            <Select disabled={selected.length === 0}>
               <SelectTrigger id="best" className="mt-1.5 h-12">
-                <SelectValue placeholder={t("Choose your specialty", "ನಿಮ್ಮ ವಿಶೇಷತೆಯನ್ನು ಆರಿಸಿ")} />
+                <SelectValue placeholder={selected.length === 0 ? t("Select accepted crops first", "ಮೊದಲು ಸ್ವೀಕೃತ ಬೆಳೆಗಳನ್ನು ಆಯ್ಕೆ ಮಾಡಿ") : t("Choose your specialty", "ನಿಮ್ಮ ವಿಶೇಷತೆಯನ್ನು ಆರಿಸಿ")} />
               </SelectTrigger>
               <SelectContent>
-                {CROPS.map((c) => (
+                {selected.map((c) => (
                   <SelectItem key={c} value={c} className="capitalize">
                     {c}
                   </SelectItem>
