@@ -11,28 +11,80 @@ import {
   LifeBuoy,
   Home,
   Info,
+  CreditCard,
+  Phone,
+  Warehouse,
+  Bell,
+  BarChart3,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useApp } from "@/lib/app-context";
 import { Button } from "@/components/ui/button";
 import { ProfileMenu } from "./ProfileMenu";
 import { cn } from "@/lib/utils";
 
 export function Navbar() {
-  const { theme, toggleTheme, language, setLanguage, t, isAuthed } = useApp();
+  const { theme, toggleTheme, language, setLanguage, t, isAuthed, role, preAuthRole, user } = useApp();
   const navigate = useNavigate();
   const path = useRouterState({ select: (s) => s.location.pathname });
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
-  const links = [
-    { to: "/", label: t("Home", "ಮುಖಪುಟ"), icon: Home },
-    { to: "/about", label: t("About", "ನಮ್ಮ ಬಗ್ಗೆ"), icon: Info },
-    { to: "/market", label: t("Market Insights", "ಮಾರುಕಟ್ಟೆ ಒಳನೋಟ"), icon: TrendingUp },
-    { to: "/help", label: t("Help & Support", "ಸಹಾಯ"), icon: LifeBuoy },
-  ] as const;
+  // Transparent-to-solid navbar on scroll
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 40);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const isLanding = path === "/";
+  const isFarmerLanding = path === "/farmer-storage";
+  const isOwnerLanding = path === "/owner-facility";
+  const isRoleLanding = isFarmerLanding || isOwnerLanding;
+  const showSignIn = isRoleLanding && !isAuthed;
+
+  // Role-aware navigation
+  const links = isAuthed
+    ? role === "owner"
+      ? [
+          { to: "/owner", label: t("Dashboard", "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್"), icon: Warehouse },
+          { to: "/owner/bookings", label: t("Bookings", "ಬುಕಿಂಗ್"), icon: TrendingUp },
+        ]
+      : [
+          { to: "/farmer/active", label: t("My Storage", "ನನ್ನ ಸಂಗ್ರಹಣೆ"), icon: Home },
+          { to: "/farmer/payment", label: t("Payment", "ಪಾವತಿ"), icon: TrendingUp },
+          { to: "/farmer/insights", label: t("Market Insights", "ಮಾರುಕಟ್ಟೆ ಒಳನೋಟ"), icon: BarChart3 },
+          { to: "/#contact", label: t("Contact Us", "ಸಂಪರ್ಕಿಸಿ"), icon: Phone, isAnchor: true },
+        ]
+    : isFarmerLanding
+      ? [
+          { to: "/farmer-storage#journey", label: t("How it Works", "ಹೇಗೆ ಕೆಲಸ ಮಾಡುತ್ತದೆ"), icon: Info, isAnchor: true },
+          { to: "/farmer-storage#pricing", label: t("Farmer Pricing", "ರೈತರ ಬೆಲೆ"), icon: LifeBuoy, isAnchor: true },
+          { to: "/farmer-storage#market", label: t("Market Insights", "ಮಾರುಕಟ್ಟೆ ಒಳನೋಟ"), icon: TrendingUp, isAnchor: true },
+          { to: "/farmer-storage#contact", label: t("Contact Us", "ಸಂಪರ್ಕಿಸಿ"), icon: Phone, isAnchor: true },
+        ]
+      : isOwnerLanding
+        ? [
+            { to: "/owner-facility#journey", label: t("How it Works", "ಹೇಗೆ ಕೆಲಸ ಮಾಡುತ್ತದೆ"), icon: Info, isAnchor: true },
+            { to: "/owner-facility#pricing", label: t("Owner Pricing", "ಮಾಲೀಕರ ಬೆಲೆ"), icon: LifeBuoy, isAnchor: true },
+            { to: "/owner-facility#contact", label: t("Contact Us", "ಸಂಪರ್ಕಿಸಿ"), icon: Phone, isAnchor: true },
+          ]
+        : [
+            { to: "/#about", label: t("About", "ನಮ್ಮ ಬಗ್ಗೆ"), icon: Info, isAnchor: true },
+            { to: "/#pricing", label: t("Pricing", "ಬೆಲೆ"), icon: LifeBuoy, isAnchor: true },
+            { to: "/#contact", label: t("Contact Us", "ಸಂಪರ್ಕಿಸಿ"), icon: Phone, isAnchor: true },
+          ];
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-border bg-background/85 backdrop-blur-md">
+    <header
+      className={cn(
+        "sticky top-0 z-40 w-full border-b transition-all duration-300",
+        (isLanding || isRoleLanding) && !isAuthed && !scrolled
+          ? "navbar-transparent"
+          : "navbar-solid border-border bg-background/85 backdrop-blur-md",
+      )}
+    >
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
         <Link to="/" className="flex items-center gap-2">
           <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-[var(--shadow-soft)]">
@@ -44,17 +96,21 @@ export function Navbar() {
         <nav className="hidden items-center gap-1 lg:flex">
           {links.map((l) => {
             const active = path === l.to;
+            const className = cn(
+              "rounded-md px-3 py-2 text-sm font-medium transition-colors",
+              active
+                ? "bg-primary-soft text-foreground"
+                : "text-muted-foreground hover:bg-muted hover:text-foreground",
+            );
+            if ('isAnchor' in l && l.isAnchor) {
+              return (
+                <a key={l.to} href={l.to} className={className}>
+                  {l.label}
+                </a>
+              );
+            }
             return (
-              <Link
-                key={l.to}
-                to={l.to}
-                className={cn(
-                  "rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                  active
-                    ? "bg-primary-soft text-foreground"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                )}
-              >
+              <Link key={l.to} to={l.to} className={className}>
                 {l.label}
               </Link>
             );
@@ -76,12 +132,28 @@ export function Navbar() {
             {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
           </Button>
           {isAuthed ? (
-            <ProfileMenu />
-          ) : (
+            <div className="flex items-center gap-2">
+              {user?.uniqueId && (
+                <span className="hidden items-center gap-1 rounded-full border border-primary/30 bg-primary-soft/50 px-2.5 py-1 text-[11px] font-bold text-primary xl:inline-flex">
+                  {user.uniqueId}
+                </span>
+              )}
+              {role === "farmer" && (
+                <Link to="/farmer/alerts" className="relative rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
+                  <Bell className="h-4 w-4" />
+                  <span className="absolute -top-0.5 -right-0.5 flex h-2.5 w-2.5">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-destructive opacity-60" />
+                    <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-destructive" />
+                  </span>
+                </Link>
+              )}
+              <ProfileMenu />
+            </div>
+          ) : showSignIn ? (
             <Button onClick={() => navigate({ to: "/login" })} size="sm" className="gap-1.5">
-              <LogIn className="h-4 w-4" /> {t("Login", "ಲಾಗಿನ್")}
+              <LogIn className="h-4 w-4" /> {t("Sign In", "ಲಾಗಿನ್")}
             </Button>
-          )}
+          ) : null}
         </div>
 
         <div className="flex items-center gap-2 lg:hidden">
@@ -99,17 +171,28 @@ export function Navbar() {
       {open && (
         <div className="border-t border-border bg-background lg:hidden">
           <div className="mx-auto flex max-w-7xl flex-col gap-1 px-4 py-3">
-            {links.map((l) => (
-              <Link
-                key={l.to}
-                to={l.to}
-                onClick={() => setOpen(false)}
-                className="flex items-center gap-2.5 rounded-md px-3 py-2.5 text-sm font-medium text-foreground hover:bg-muted"
-              >
-                <l.icon className="h-4 w-4 text-primary" />
-                {l.label}
-              </Link>
-            ))}
+            {links.map((l) => {
+              const className = "flex items-center gap-2.5 rounded-md px-3 py-2.5 text-sm font-medium text-foreground hover:bg-muted";
+              if ('isAnchor' in l && l.isAnchor) {
+                return (
+                  <a key={l.to} href={l.to} onClick={() => setOpen(false)} className={className}>
+                    <l.icon className="h-4 w-4 text-primary" />
+                    {l.label}
+                  </a>
+                );
+              }
+              return (
+                <Link
+                  key={l.to}
+                  to={l.to}
+                  onClick={() => setOpen(false)}
+                  className={className}
+                >
+                  <l.icon className="h-4 w-4 text-primary" />
+                  {l.label}
+                </Link>
+              );
+            })}
             <div className="mt-2 flex items-center gap-2 border-t border-border pt-3">
               <Button
                 variant="outline"
@@ -124,7 +207,7 @@ export function Navbar() {
                 {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
               </Button>
             </div>
-            {!isAuthed && (
+            {showSignIn && (
               <Button
                 onClick={() => {
                   setOpen(false);
@@ -133,7 +216,7 @@ export function Navbar() {
                 size="sm"
                 className="mt-2 gap-1.5"
               >
-                <LogIn className="h-4 w-4" /> {t("Login", "ಲಾಗಿನ್")}
+                <LogIn className="h-4 w-4" /> {t("Sign In", "ಲಾಗಿನ್")}
               </Button>
             )}
           </div>

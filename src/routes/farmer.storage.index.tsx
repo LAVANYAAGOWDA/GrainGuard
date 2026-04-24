@@ -20,6 +20,7 @@ import {
   Building2,
   Instagram,
   CreditCard,
+  Timer,
 } from "lucide-react";
 import { PageShell } from "@/components/PageShell";
 import { Button } from "@/components/ui/button";
@@ -34,6 +35,7 @@ import { useApp } from "@/lib/app-context";
 import { FlowBreadcrumb } from "@/components/Breadcrumb";
 import { Suspense, useEffect, useState, type ComponentType } from "react";
 import { cn } from "@/lib/utils";
+import { CROPS } from "./farmer.index";
 
 // Client-only loader. React.lazy inside a route module still gets eagerly
 // resolved by TanStack's SSR loader pipeline, which then evaluates Leaflet
@@ -208,21 +210,63 @@ function StorageList() {
   const search = Route.useSearch();
   const [cropFilter, setCropFilter] = useState<string>(search.crop ?? "all");
   const [capFilter, setCapFilter] = useState("all");
+  const [catFilter, setCatFilter] = useState("all");
   const [view, setView] = useState<"list" | "map">("list");
   const [radius, setRadius] = useState(10);
+  const [timeLeft, setTimeLeft] = useState(300);
+  const [radiusAutoExpanded, setRadiusAutoExpanded] = useState(false);
+
+  // Auto-populate crop filter from search params on mount
+  useEffect(() => {
+    if (search.crop && search.crop !== "all") {
+      setCropFilter(search.crop);
+    }
+  }, [search.crop]);
+
+  useEffect(() => {
+    if (timeLeft <= 0) return;
+    const timer = setInterval(() => setTimeLeft((t) => t - 1), 1000);
+    return () => clearInterval(timer);
+  }, [timeLeft]);
+
+  // Parse multi-crop selection
+  const selectedCrops = cropFilter !== "all" ? cropFilter.split(",").filter(Boolean) : [];
 
   const baseResults = useMemo(() => {
     return STORAGES.filter((s) => {
-      if (cropFilter !== "all" && !s.crops.includes(cropFilter)) return false;
+      // Multi-crop: facilities must accommodate ALL selected crops
+      if (selectedCrops.length > 0) {
+        const supportsAll = selectedCrops.every((c) => s.crops.includes(c));
+        if (!supportsAll) return false;
+      }
       if (capFilter === "small" && s.capacity > 3000) return false;
       if (capFilter === "medium" && (s.capacity <= 3000 || s.capacity > 6000)) return false;
       if (capFilter === "large" && s.capacity <= 6000) return false;
+      if (catFilter !== "all" && s.type !== catFilter) return false;
       return true;
+    }).sort((a, b) => {
+      // Sort: facilities supporting ALL crops first
+      if (selectedCrops.length > 1) {
+        const aAll = selectedCrops.every((c) => a.crops.includes(c));
+        const bAll = selectedCrops.every((c) => b.crops.includes(c));
+        if (aAll && !bAll) return -1;
+        if (!aAll && bAll) return 1;
+      }
+      return 0;
     });
-  }, [cropFilter, capFilter]);
+  }, [cropFilter, capFilter, catFilter, selectedCrops]);
 
   const inRadius = baseResults.filter((s) => s.distanceKm <= radius);
   const radiusExpanded = inRadius.length === 0 && baseResults.length > 0;
+
+  // Auto-expand radius to 50km if no results within 10km
+  useEffect(() => {
+    if (radiusExpanded && radius === 10 && !radiusAutoExpanded) {
+      setRadius(50);
+      setRadiusAutoExpanded(true);
+    }
+  }, [radiusExpanded, radius, radiusAutoExpanded]);
+
   const results = radiusExpanded ? baseResults : inRadius;
 
   const aiSuggestion = useMemo(() => {
@@ -304,40 +348,35 @@ function StorageList() {
           </div>
         </div>
 
+        {/* Capacity Lock Timer Banner */}
+        <div className="mt-4 flex items-center justify-between gap-3 rounded-xl border border-earth/20 bg-earth/10 p-4">
+          <div className="flex items-center gap-3 text-sm">
+            <Timer className="h-5 w-5 text-earth" />
+            <div>
+              <div className="font-semibold">{t("Capacity Lock Active", "ಸಾಮರ್ಥ್ಯ ಲಾಕ್ ಸಕ್ರಿಯವಾಗಿದೆ")}</div>
+              <p className="text-muted-foreground">
+                {t("High demand! Complete booking to secure your spot.", "ಹೆಚ್ಚಿನ ಬೇಡಿಕೆ! ನಿಮ್ಮ ಸ್ಥಳವನ್ನು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಲು ಬುಕಿಂಗ್ ಪೂರ್ಣಗೊಳಿಸಿ.")}
+              </p>
+            </div>
+          </div>
+          <div className="font-mono text-xl font-bold text-earth">
+            {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
+          </div>
+        </div>
+
         {/* Radius expanded alert */}
-        {radiusExpanded && (
-          <div className="mt-3 space-y-2">
+        {radiusAutoExpanded && (
+          <div className="mt-3">
             <div className="flex items-start gap-3 rounded-xl border border-warning/40 bg-warning/10 p-4">
               <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-warning-foreground" />
               <div className="text-sm">
                 <div className="font-semibold">
-                  {t("Radius Expanded", "ವ್ಯಾಪ್ತಿ ವಿಸ್ತರಿಸಲಾಗಿದೆ")}
+                  {t("Search Area Expanded", "ಹುಡುಕಾಟ ಪ್ರದೇಶ ವಿಸ್ತರಿಸಲಾಗಿದೆ")}
                 </div>
                 <p className="mt-0.5 text-muted-foreground">
                   {t(
-                    "No storage within 10km. Showing nearby options.",
-                    "10 ಕಿಮೀ ಒಳಗೆ ಸಂಗ್ರಹಣೆ ಇಲ್ಲ. ಸಮೀಪದ ಆಯ್ಕೆಗಳನ್ನು ತೋರಿಸಲಾಗಿದೆ.",
-                  )}
-                </p>
-                <button
-                  type="button"
-                  onClick={() => setRadius(50)}
-                  className="mt-1.5 text-xs font-semibold text-primary hover:underline"
-                >
-                  {t("Expand to 50km", "50 ಕಿಮೀಗೆ ವಿಸ್ತರಿಸಿ")}
-                </button>
-              </div>
-            </div>
-            <div className="flex items-start gap-3 rounded-xl border border-earth/30 bg-earth/10 p-4">
-              <Truck className="mt-0.5 h-4 w-4 shrink-0 text-earth" />
-              <div className="text-sm">
-                <div className="font-semibold">
-                  {t("Subsidised transport available", "ಸಬ್ಸಿಡಿ ಸಾಗಣೆ ಲಭ್ಯ")}
-                </div>
-                <p className="mt-0.5 text-muted-foreground">
-                  {t(
-                    "GrainGuard partners with local transporters for distant facilities.",
-                    "ದೂರದ ಸೌಲಭ್ಯಗಳಿಗೆ ಸ್ಥಳೀಯ ಸಾಗಣೆದಾರರೊಂದಿಗೆ ನಾವು ಪಾಲುದಾರರು.",
+                    "Expanding search area to find the best match for your crops.",
+                    "ನಿಮ್ಮ ಬೆಳೆಗಳಿಗೆ ಉತ್ತಮ ಹೊಂದಾಣಿಕೆ ಹುಡುಕಲು ಹುಡುಕಾಟ ಪ್ರದೇಶವನ್ನು ವಿಸ್ತರಿಸಲಾಗಿದೆ.",
                   )}
                 </p>
               </div>
@@ -361,12 +400,11 @@ function StorageList() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">{t("All crops", "ಎಲ್ಲಾ ಬೆಳೆಗಳು")}</SelectItem>
-                    <SelectItem value="rice">{t("Rice", "ಅಕ್ಕಿ")}</SelectItem>
-                    <SelectItem value="wheat">{t("Wheat", "ಗೋಧಿ")}</SelectItem>
-                    <SelectItem value="maize">{t("Maize", "ಮೆಕ್ಕೆ")}</SelectItem>
-                    <SelectItem value="ragi">{t("Ragi", "ರಾಗಿ")}</SelectItem>
-                    <SelectItem value="jowar">{t("Jowar", "ಜೋಳ")}</SelectItem>
-                    <SelectItem value="pulses">{t("Pulses", "ಬೇಳೆ")}</SelectItem>
+                    {CROPS.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.label[language]}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -383,6 +421,22 @@ function StorageList() {
                     <SelectItem value="small">{"≤ 3,000 kg"}</SelectItem>
                     <SelectItem value="medium">{"3,000–6,000 kg"}</SelectItem>
                     <SelectItem value="large">{"> 6,000 kg"}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="mb-1.5 block text-sm font-medium">
+                  {t("Category", "ವರ್ಗ")}
+                </label>
+                <Select value={catFilter} onValueChange={setCatFilter}>
+                  <SelectTrigger className="h-10">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">{t("All Categories", "ಎಲ್ಲಾ ವರ್ಗಗಳು")}</SelectItem>
+                    <SelectItem value="commercial">{t("Commercial", "ವಾಣಿಜ್ಯ")}</SelectItem>
+                    <SelectItem value="p2p">{t("Community P2P", "ಸಮುದಾಯ P2P")}</SelectItem>
+                    <SelectItem value="govt">{t("Government Approved", "ಸರ್ಕಾರ ಅನುಮೋದಿತ")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -496,7 +550,7 @@ function StorageList() {
                         </span>
                       </div>
 
-                      {/* Rating + temp */}
+                      {/* Rating + temp + crop icons */}
                       <div className="mt-3 flex flex-wrap items-center gap-3 text-xs">
                         <span className="inline-flex items-center gap-1 rounded-full bg-warning/15 px-2 py-0.5 font-semibold text-warning-foreground">
                           <Star className="h-3 w-3 fill-current" />
@@ -519,6 +573,11 @@ function StorageList() {
                           <ShieldCheck className="h-3 w-3 text-primary" />
                           {s.security.length} {t("security features", "ಸುರಕ್ಷತಾ ವೈಶಿಷ್ಟ್ಯಗಳು")}
                         </span>
+                        {selectedCrops.length > 0 && (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-primary-soft px-2 py-0.5 text-[10px] font-bold text-primary">
+                            {selectedCrops.filter(c => s.crops.includes(c)).length}/{selectedCrops.length} {t("crops", "ಬೆಳೆ")}
+                          </span>
+                        )}
                       </div>
 
                       {/* Capacity bar */}

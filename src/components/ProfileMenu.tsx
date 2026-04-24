@@ -7,6 +7,8 @@ import {
   BadgeCheck,
   Phone,
   Mail,
+  ShieldCheck,
+  Crown,
 } from "lucide-react";
 import { useApp } from "@/lib/app-context";
 import {
@@ -17,10 +19,25 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { useState } from "react";
+import { MoreVertical, Star, MessageSquare } from "lucide-react";
 
 export function ProfileMenu({ onItemClick }: { onItemClick?: () => void }) {
-  const { user, logout, t } = useApp();
+  const { user, logout, t, isKycVerified, role } = useApp();
   const navigate = useNavigate();
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [rating, setRating] = useState(0);
 
   if (!user) return null;
 
@@ -38,20 +55,23 @@ export function ProfileMenu({ onItemClick }: { onItemClick?: () => void }) {
   };
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button
-          type="button"
-          aria-label="Profile menu"
-          className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-primary/30 bg-primary-soft text-sm font-bold text-foreground transition-all hover:border-primary hover:shadow-[var(--shadow-soft)]"
-        >
-          {user.photo ? (
-            <img src={user.photo} alt="" className="h-full w-full rounded-full object-cover" />
-          ) : (
-            initials
-          )}
-        </button>
-      </DropdownMenuTrigger>
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button
+            type="button"
+            aria-label="Profile menu"
+            className="flex items-center justify-center rounded-full border border-border bg-card p-0.5 transition-all hover:border-primary hover:shadow-[var(--shadow-soft)]"
+          >
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-soft text-xs font-bold text-foreground">
+              {user.photo ? (
+                <img src={user.photo} alt="" className="h-full w-full rounded-full object-cover" />
+              ) : (
+                initials
+              )}
+            </div>
+          </button>
+        </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-72">
         <div className="flex items-center gap-3 px-2 py-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary-soft text-base font-bold text-foreground">
@@ -61,9 +81,24 @@ export function ProfileMenu({ onItemClick }: { onItemClick?: () => void }) {
             <div className="truncate text-sm font-semibold">
               {user.name || t("Add your name", "ನಿಮ್ಮ ಹೆಸರು ಸೇರಿಸಿ")}
             </div>
-            <div className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
-              <BadgeCheck className="h-3 w-3 text-primary" />
-              <span className="font-mono">{user.uniqueId}</span>
+            <div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+              {isKycVerified ? (
+                <span className="inline-flex items-center gap-0.5 rounded-full bg-success/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-success">
+                  <BadgeCheck className="h-3 w-3" />
+                  {t("Verified Identity", "ಪರಿಶೀಲಿಸಿದ ಗುರುತು")}
+                </span>
+              ) : (
+                <>
+                  <BadgeCheck className="h-3 w-3 text-primary" />
+                  <span className="font-mono">{user.uniqueId}</span>
+                </>
+              )}
+              {role === "owner" && user.membership && (
+                <span className="ml-2 inline-flex items-center gap-0.5 rounded-full bg-warning/20 px-2 py-0.5 text-[10px] font-bold text-warning-foreground uppercase tracking-wider">
+                  <Crown className="h-3 w-3" />
+                  {user.membership}
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -81,24 +116,37 @@ export function ProfileMenu({ onItemClick }: { onItemClick?: () => void }) {
           {t("Account", "ಖಾತೆ")}
         </DropdownMenuLabel>
         <DropdownMenuItem asChild onClick={onItemClick}>
+          <Link to="/farmer-details" className="cursor-pointer">
+            <UserIcon className="mr-2 h-4 w-4" />
+            {t("My Details", "ನನ್ನ ವಿವರಗಳು")}
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild onClick={onItemClick}>
           <Link to="/orders" className="cursor-pointer">
             <FileText className="mr-2 h-4 w-4" />
             {t("Orders & Invoices", "ಆದೇಶಗಳು ಮತ್ತು ಸರಕುಪಟ್ಟಿ")}
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem asChild onClick={onItemClick}>
-          <Link to="/settings" className="cursor-pointer">
-            <Settings className="mr-2 h-4 w-4" />
-            {t("Settings", "ಸೆಟ್ಟಿಂಗ್‌ಗಳು")}
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild onClick={onItemClick}>
-          <Link to="/settings" className="cursor-pointer">
-            <UserIcon className="mr-2 h-4 w-4" />
-            {t("Profile", "ಪ್ರೊಫೈಲ್")}
-          </Link>
-        </DropdownMenuItem>
+        {!isKycVerified && (
+          <DropdownMenuItem asChild onClick={onItemClick}>
+            <Link to="/kyc" className="cursor-pointer text-primary">
+              <ShieldCheck className="mr-2 h-4 w-4" />
+              {t("Verify Identity (KYC)", "ಗುರುತು ಪರಿಶೀಲನೆ (KYC)")}
+            </Link>
+          </DropdownMenuItem>
+        )}
         <DropdownMenuSeparator />
+        <DropdownMenuItem
+          onSelect={(e) => {
+            e.preventDefault();
+            setFeedbackOpen(true);
+            onItemClick?.();
+          }}
+          className="cursor-pointer"
+        >
+          <MessageSquare className="mr-2 h-4 w-4" />
+          {t("Leave Feedback", "ಪ್ರತಿಕ್ರಿಯೆ ನೀಡಿ")}
+        </DropdownMenuItem>
         <DropdownMenuItem
           onClick={handleLogout}
           className="cursor-pointer text-destructive focus:text-destructive"
@@ -108,5 +156,54 @@ export function ProfileMenu({ onItemClick }: { onItemClick?: () => void }) {
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
+
+    <Dialog open={feedbackOpen} onOpenChange={setFeedbackOpen}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>{t("Leave Feedback", "ಪ್ರತಿಕ್ರಿಯೆ ನೀಡಿ")}</DialogTitle>
+          <DialogDescription>
+            {t("Rate your experience and tell us about the facility.", "ನಿಮ್ಮ ಅನುಭವವನ್ನು ರೇಟ್ ಮಾಡಿ ಮತ್ತು ಸೌಲಭ್ಯದ ಬಗ್ಗೆ ನಮಗೆ ತಿಳಿಸಿ.")}
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+          <div className="flex justify-center gap-2">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <button
+                key={star}
+                type="button"
+                onClick={() => setRating(star)}
+                className="transition-transform hover:scale-110"
+              >
+                <Star
+                  className={`h-8 w-8 ${
+                    rating >= star ? "fill-warning text-warning" : "text-muted-foreground"
+                  }`}
+                />
+              </button>
+            ))}
+          </div>
+          <div className="grid gap-2">
+            <Input id="facility" placeholder={t("Facility ID or Name (Optional)", "ಸೌಲಭ್ಯದ ಐಡಿ ಅಥವಾ ಹೆಸರು (ಐಚ್ಛಿಕ)")} />
+          </div>
+          <div className="grid gap-2">
+            <Textarea
+              id="comments"
+              placeholder={t("Tell us what you liked or how we can improve...", "ನಿಮಗೆ ಏನು ಇಷ್ಟವಾಯಿತು ಅಥವಾ ನಾವು ಹೇಗೆ ಸುಧಾರಿಸಬಹುದು ಎಂದು ನಮಗೆ ತಿಳಿಸಿ...")}
+              className="resize-none"
+              rows={3}
+            />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button type="button" variant="outline" onClick={() => setFeedbackOpen(false)}>
+            {t("Cancel", "ರದ್ದುಗೊಳಿಸಿ")}
+          </Button>
+          <Button type="button" onClick={() => setFeedbackOpen(false)}>
+            {t("Submit Feedback", "ಪ್ರತಿಕ್ರಿಯೆ ಸಲ್ಲಿಸಿ")}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }

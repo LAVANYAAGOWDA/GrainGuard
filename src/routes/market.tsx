@@ -11,6 +11,9 @@ import {
 import { PageShell } from "@/components/PageShell";
 import { useApp } from "@/lib/app-context";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Link } from "@tanstack/react-router";
+import { Crown, Lock } from "lucide-react";
 
 export const Route = createFileRoute("/market")({
   head: () => ({
@@ -29,7 +32,7 @@ export const Route = createFileRoute("/market")({
 });
 
 function Market() {
-  const { t } = useApp();
+  const { t, role, user } = useApp();
 
   // Frontend-only static placeholder; backend will provide real data.
   const trends = [
@@ -38,6 +41,34 @@ function Market() {
     { crop: "Maize", change: 2.5, dir: "up" as const },
     { crop: "Ragi", change: 6.1, dir: "up" as const },
   ];
+
+  if (role === "owner" && user?.membership === "Basic") {
+    return (
+      <PageShell>
+        <section className="mx-auto max-w-2xl px-4 py-20 text-center sm:px-6">
+          <div className="rounded-3xl border-2 border-primary/20 bg-primary/5 p-10 shadow-[var(--shadow-elevated)] relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-4">
+              <Crown className="h-16 w-16 text-primary/10" />
+            </div>
+            <Lock className="mx-auto h-12 w-12 text-primary" />
+            <h1 className="mt-6 text-3xl font-black text-foreground">
+              {t("Prime Feature", "ಪ್ರೀಮಿಯಂ ವೈಶಿಷ್ಟ್ಯ")}
+            </h1>
+            <p className="mt-4 text-lg text-muted-foreground max-w-md mx-auto">
+              {t(
+                "Market Insights are exclusive to Prime Owners. Upgrade to get AI predictions and regional price trends.",
+                "ಮಾರುಕಟ್ಟೆ ಒಳನೋಟಗಳು ಪ್ರೈಮ್ ಮಾಲೀಕರಿಗೆ ಮಾತ್ರ ಮೀಸಲು. AI ಮುನ್ಸೂಚನೆಗಳನ್ನು ಪಡೆಯಲು ಅಪ್‌ಗ್ರೇಡ್ ಮಾಡಿ."
+              )}
+            </p>
+            <Button size="lg" className="mt-8 gap-2 rounded-full h-12 px-8" onClick={() => alert('Redirecting to payment gateway...')}>
+              <Crown className="h-4 w-4" />
+              {t("Upgrade to Prime - ₹999/mo", "ಪ್ರೀಮಿಯಂಗೆ ಅಪ್‌ಗ್ರೇಡ್ ಮಾಡಿ - ₹999/ತಿಂಗಳು")}
+            </Button>
+          </div>
+        </section>
+      </PageShell>
+    );
+  }
 
   return (
     <PageShell>
@@ -122,9 +153,19 @@ function Market() {
 
         {/* AI prediction */}
         <div className="mt-6 rounded-xl border border-primary/30 bg-primary-soft/40 p-6">
-          <div className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-primary" />
-            <h2 className="font-semibold">{t("AI Selling Prediction", "AI ಮಾರಾಟ ಮುನ್ಸೂಚನೆ")}</h2>
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-primary" />
+              <h2 className="font-semibold">{t("AI Selling Prediction", "AI ಮಾರಾಟ ಮುನ್ಸೂಚನೆ")}</h2>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-muted-foreground">
+                {t("Platform Commission: 1.5%", "ವೇದಿಕೆ ಶುಲ್ಕ: 1.5%")}
+              </span>
+              <Button className="bg-success text-success-foreground hover:bg-success/90">
+                {t("Sell Crop Now", "ಬೆಳೆ ಈಗ ಮಾರಿ")}
+              </Button>
+            </div>
           </div>
           <div className="mt-4 grid gap-4 sm:grid-cols-3">
             <div className="rounded-lg bg-card p-4">

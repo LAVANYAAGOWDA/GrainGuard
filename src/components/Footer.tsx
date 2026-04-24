@@ -33,9 +33,9 @@ export function Footer() {
               </Link>
             </li>
             <li>
-              <Link to="/about" className="transition-colors hover:text-primary">
+              <a href="/#about" className="transition-colors hover:text-primary">
                 {t("About", "ನಮ್ಮ ಬಗ್ಗೆ")}
-              </Link>
+              </a>
             </li>
             <li>
               <Link to="/market" className="transition-colors hover:text-primary">
@@ -100,9 +100,9 @@ export function Footer() {
             <Link to="/help" className="transition-colors hover:text-primary">
               {t("Support", "ಬೆಂಬಲ")}
             </Link>
-            <Link to="/about" className="transition-colors hover:text-primary">
+            <a href="/#about" className="transition-colors hover:text-primary">
               {t("About", "ನಮ್ಮ ಬಗ್ಗೆ")}
-            </Link>
+            </a>
           </div>
         </div>
       </div>

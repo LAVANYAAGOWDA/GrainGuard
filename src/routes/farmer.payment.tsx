@@ -21,18 +21,24 @@ import { FlowBreadcrumb } from "@/components/Breadcrumb";
 interface SearchParams {
   id?: string;
   quantity?: string;
-  duration?: string;
+  startDate?: string;
+  endDate?: string;
   unit?: string;
   ref?: string;
+  crop?: string;
+  remainingCrops?: string;
 }
 
 export const Route = createFileRoute("/farmer/payment")({
   validateSearch: (s: Record<string, unknown>): SearchParams => ({
     id: typeof s.id === "string" ? s.id : undefined,
     quantity: typeof s.quantity === "string" ? s.quantity : undefined,
-    duration: typeof s.duration === "string" ? s.duration : undefined,
+    startDate: typeof s.startDate === "string" ? s.startDate : undefined,
+    endDate: typeof s.endDate === "string" ? s.endDate : undefined,
     unit: typeof s.unit === "string" ? s.unit : undefined,
     ref: typeof s.ref === "string" ? s.ref : undefined,
+    crop: typeof s.crop === "string" ? s.crop : undefined,
+    remainingCrops: typeof s.remainingCrops === "string" ? s.remainingCrops : undefined,
   }),
   head: () => ({ meta: [{ title: "Escrow Payment — GrainGuard" }] }),
   component: Payment,
@@ -41,7 +47,7 @@ export const Route = createFileRoute("/farmer/payment")({
 type Status = "idle" | "processing" | "success" | "failure" | "offline";
 
 function Payment() {
-  const { t, setActiveBooking } = useApp();
+  const { t, addBooking } = useApp();
   const search = Route.useSearch();
   const navigate = useNavigate();
   const [status, setStatus] = useState<Status>("idle");
@@ -61,8 +67,22 @@ function Payment() {
 
   const storage = STORAGES.find((s) => s.id === search.id);
   const qty = Number(search.quantity) || 0;
-  const dur = Number(search.duration) || 1;
-  const subtotal = storage ? storage.price * qty * dur : 0;
+  
+  const calculateDays = () => {
+    if (!search.startDate || !search.endDate) return 30;
+    try {
+      const s = new Date(search.startDate);
+      const e = new Date(search.endDate);
+      if (isNaN(s.getTime()) || isNaN(e.getTime())) return 30;
+      return Math.max(1, Math.ceil(Math.abs(e.getTime() - s.getTime()) / (1000 * 60 * 60 * 24)));
+    } catch {
+      return 30;
+    }
+  };
+  
+  const days = calculateDays();
+  const durMonths = Math.max(1, Math.round(days / 30));
+  const subtotal = storage ? (storage.price || 0) * qty * durMonths : 0;
   const fee = Math.round(subtotal * 0.02);
   const total = subtotal + fee;
 
@@ -72,23 +92,31 @@ function Payment() {
       return;
     }
     setStatus("processing");
-    setTimeout(() => {
-      const ok = Math.random() > 0.2;
-      if (ok && storage) {
-        setActiveBooking({
-          storageName: storage.name,
-          location: storage.location,
-          crop: "rice",
-          quantity: `${qty} ${search.unit ?? "kg"}`,
-          duration: dur,
-          daysRemaining: dur * 30,
-        });
-        setStatus("success");
-      } else {
-        setStatus("failure");
-      }
-    }, 1800);
   };
+
+  const handleSimulatedPayment = (success: boolean) => {
+    setStatus("idle");
+    if (success && storage) {
+      const bookedCrop = search.crop || "rice";
+      addBooking({
+        storageName: storage.name,
+        location: storage.location,
+        crop: bookedCrop,
+        quantity: `${qty} ${search.unit ?? "kg"}`,
+        duration: durMonths,
+        daysRemaining: days,
+      });
+      setStatus("success");
+    } else {
+      setStatus("failure");
+    }
+  };
+
+  // Calculate remaining crops for sequential booking
+  const bookedCrop = search.crop || "rice";
+  const remainingCrops = search.remainingCrops
+    ? search.remainingCrops.split(",").filter((c) => c !== bookedCrop)
+    : [];
 
   if (!storage) {
     return (
@@ -133,6 +161,27 @@ function Payment() {
               >
                 {t("View My Storage", "ನನ್ನ ಸಂಗ್ರಹಣೆ ನೋಡಿ")}
               </Button>
+              {remainingCrops.length > 0 && (
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="w-full gap-2 border-primary text-primary hover:bg-primary-soft"
+                  onClick={() =>
+                    navigate({
+                      to: "/farmer/storage",
+                      search: {
+                        crop: remainingCrops.join(","),
+                        quantity: search.quantity,
+                        startDate: search.startDate,
+                        endDate: search.endDate,
+                        unit: search.unit,
+                      },
+                    })
+                  }
+                >
+                  {t(`Continue to book ${remainingCrops.length} remaining crop(s)`, `ಉಳಿದ ${remainingCrops.length} ಬೆಳೆ(ಗಳು) ಬುಕ್ ಮಾಡಲು ಮುಂದುವರಿಸಿ`)}
+                </Button>
+              )}
               <Button asChild variant="outline" size="lg" className="w-full gap-2">
                 <Link to="/orders">
                   <Download className="h-4 w-4" />
@@ -232,7 +281,8 @@ function Payment() {
             search={{
               id: storage.id,
               quantity: search.quantity,
-              duration: search.duration,
+              startDate: search.startDate,
+              endDate: search.endDate,
               unit: search.unit,
             }}
           >
@@ -241,7 +291,7 @@ function Payment() {
         </Button>
         <h1 className="text-3xl font-bold">{t("Escrow Payment", "ಎಸ್ಕ್ರೋ ಪಾವತಿ")}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          {t("Powered by Razorpay · Secured by GrainGuard", "Razorpay ಮೂಲಕ · GrainGuard ಸುರಕ್ಷಿತ")}
+          {t("Secured by GrainGuard Escrow Protocol", "GrainGuard ಎಸ್ಕ್ರೋ ಪ್ರೋಟೋಕಾಲ್ ಮೂಲಕ ಸುರಕ್ಷಿತ")}
         </p>
 
         <div className="mt-6 grid gap-4 md:grid-cols-[1fr_320px]">
@@ -251,7 +301,7 @@ function Payment() {
               <Row label={t("Storage", "ಸಂಗ್ರಹಣೆ")} value={storage.name} />
               <Row label={t("Location", "ಸ್ಥಳ")} value={storage.location} />
               <Row label={t("Quantity", "ಪ್ರಮಾಣ")} value={`${qty} ${search.unit ?? "kg"}`} />
-              <Row label={t("Duration", "ಅವಧಿ")} value={`${dur} ${t("month(s)", "ತಿಂಗಳು")}`} />
+              <Row label={t("Duration", "ಅವಧಿ")} value={`${days} ${t("days", "ದಿನಗಳು")}`} />
               {search.ref && <Row label={t("Reference", "ಉಲ್ಲೇಖ")} value={search.ref} />}
               <div className="my-2 border-t border-border" />
               <Row label={t("Subtotal", "ಉಪಮೊತ್ತ")} value={`₹${subtotal.toLocaleString()}`} />
@@ -262,19 +312,19 @@ function Payment() {
 
             <Button
               size="lg"
-              className="mt-5 h-12 w-full gap-2 text-base"
-              onClick={pay}
+              className="mt-5 h-12 w-full gap-2 text-base bg-success hover:bg-success/90"
+              onClick={() => handleSimulatedPayment(true)}
               disabled={status === "processing"}
             >
               {status === "processing" ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  {t("Processing...", "ಪ್ರಕ್ರಿಯೆ ನಡೆಯುತ್ತಿದೆ...")}
+                  {t("Transferring to Escrow...", "ಎಸ್ಕ್ರೋಗೆ ವರ್ಗಾಯಿಸಲಾಗುತ್ತಿದೆ...")}
                 </>
               ) : (
                 <>
-                  <CreditCard className="h-4 w-4" />
-                  {t("Proceed to Payment", "ಪಾವತಿಗೆ ಮುಂದುವರಿಯಿರಿ")}
+                  <ShieldCheck className="h-4 w-4" />
+                  {t("Confirm Escrow Transfer", "ಎಸ್ಕ್ರೋ ವರ್ಗಾವಣೆಯನ್ನು ಖಚಿತಪಡಿಸಿ")}
                 </>
               )}
             </Button>
@@ -307,6 +357,8 @@ function Payment() {
           </aside>
         </div>
       </section>
+
+
     </PageShell>
   );
 }

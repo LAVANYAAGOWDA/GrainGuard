@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Bot, X, Send, Sparkles } from "lucide-react";
+import { Bot, X, Send, Sparkles, Wheat } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useApp } from "@/lib/app-context";
@@ -22,7 +22,7 @@ export function ChatbotWidget() {
           open && "rotate-90",
         )}
       >
-        {open ? <X className="h-6 w-6" /> : <Bot className="h-6 w-6" />}
+        {open ? <X className="h-6 w-6" /> : <Wheat className="h-6 w-6" />}
         {!open && (
           <span className="absolute -top-1 -right-1 flex h-3 w-3">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-60" />
@@ -68,6 +68,9 @@ export function ChatbotWidget() {
                 t("How does escrow work?", "ಎಸ್ಕ್ರೋ ಹೇಗೆ ಕೆಲಸ ಮಾಡುತ್ತದೆ?"),
                 t("Find storage near me", "ಸಮೀಪದ ಸಂಗ್ರಹಣೆ"),
                 t("Payment failed", "ಪಾವತಿ ವಿಫಲ"),
+                t("Does it work offline without mobile data?", "ಮೊಬೈಲ್ ಡೇಟಾ ಇಲ್ಲದೆ ಆಫ್‌ಲೈನ್‌ನಲ್ಲಿ ಕೆಲಸ ಮಾಡುತ್ತದೆಯೇ?"),
+                t("How to check market prices?", "ಮಾರುಕಟ್ಟೆ ಬೆಲೆಗಳನ್ನು ಪರಿಶೀಲಿಸುವುದು ಹೇಗೆ?"),
+                t("Is my grain insured?", "ನನ್ನ ಧಾನ್ಯಕ್ಕೆ ವಿಮೆ ಇದೆಯೇ?"),
               ].map((s) => (
                 <button
                   key={s}

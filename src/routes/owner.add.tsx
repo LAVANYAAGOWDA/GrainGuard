@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { ArrowLeft, CheckCircle2, MapPin, Sparkles } from "lucide-react";
+import { ArrowLeft, MapPin, Sparkles } from "lucide-react";
 import { PageShell } from "@/components/PageShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,43 +21,39 @@ export const Route = createFileRoute("/owner/add")({
   component: AddStorage,
 });
 
-const CROPS = ["rice", "wheat", "maize", "ragi", "jowar", "pulses"];
+const CROPS = [
+  "bajra", "barley", "jowar", "maize", "paddy", "ragi", "wheat", 
+  "copra", "groundnut", "mustard", "safflower", "sesamum", 
+  "soyabean", "sunflower", "arhar", "bengal_gram", "black_gram", "green_gram"
+];
 
 function AddStorage() {
-  const { t } = useApp();
+  const { t, addOwnerStorage } = useApp();
   const navigate = useNavigate();
   const [selected, setSelected] = useState<string[]>([]);
   const [type, setType] = useState("p2p");
-  const [submitted, setSubmitted] = useState(false);
+  const [capacity, setCapacity] = useState("");
+  const [storageName, setStorageName] = useState("");
+  const [price, setPrice] = useState("");
+  const [location, setLocation] = useState("");
+  const [address, setAddress] = useState("");
 
   const toggle = (c: string) =>
     setSelected((s) => (s.includes(c) ? s.filter((x) => x !== c) : [...s, c]));
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
-    setTimeout(() => navigate({ to: "/owner" }), 1500);
+    addOwnerStorage({
+      name: storageName,
+      type,
+      capacity: Number(capacity),
+      pricePerUnit: Number(price),
+      crops: selected,
+      location,
+      address,
+    });
+    navigate({ to: "/owner/storage-success" });
   };
-
-  if (submitted) {
-    return (
-      <PageShell>
-        <section className="mx-auto max-w-md px-4 py-20 text-center sm:px-6">
-          <div className="rounded-2xl border border-border bg-card p-8 shadow-[var(--shadow-card)]">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-success/15">
-              <CheckCircle2 className="h-9 w-9 text-success" />
-            </div>
-            <h1 className="mt-4 text-2xl font-bold">
-              {t("Storage Added", "ಸಂಗ್ರಹಣೆ ಸೇರಿಸಲಾಗಿದೆ")}
-            </h1>
-            <p className="mt-2 text-sm text-muted-foreground">
-              {t("Returning to dashboard...", "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್‌ಗೆ ಹಿಂದಿರುಗುತ್ತಿದೆ...")}
-            </p>
-          </div>
-        </section>
-      </PageShell>
-    );
-  }
 
   return (
     <PageShell>
@@ -88,6 +84,8 @@ function AddStorage() {
               required
               placeholder={t("e.g. Green Field Warehouse", "ಉದಾ. ಗ್ರೀನ್ ಫೀಲ್ಡ್")}
               className="mt-1.5 h-12 text-base"
+              value={storageName}
+              onChange={(e) => setStorageName(e.target.value)}
             />
           </div>
 
@@ -118,8 +116,24 @@ function AddStorage() {
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <Label htmlFor="cap">{t("Total Capacity (kg)", "ಒಟ್ಟು ಸಾಮರ್ಥ್ಯ (ಕೆಜಿ)")}</Label>
-              <Input id="cap" type="number" min={100} required className="mt-1.5 h-12 text-base" />
+              <Label htmlFor="cap">{t("Total Capacity", "ಒಟ್ಟು ಸಾಮರ್ಥ್ಯ")}</Label>
+              <Input 
+                id="cap" 
+                type="number" 
+                min={100} 
+                required 
+                className="mt-1.5 h-12 text-base" 
+                value={capacity}
+                onChange={(e) => setCapacity(e.target.value)}
+                placeholder="e.g. 1000"
+              />
+              {capacity && (
+                <div className="mt-2 flex gap-3 text-xs text-muted-foreground bg-muted/30 p-2 rounded-md">
+                  <span><strong className="text-foreground">{capacity}</strong> kg</span>
+                  <span><strong className="text-foreground">{(Number(capacity) / 100).toFixed(2)}</strong> quintal</span>
+                  <span><strong className="text-foreground">{(Number(capacity) / 1000).toFixed(2)}</strong> ton</span>
+                </div>
+              )}
             </div>
             <div>
               <Label htmlFor="price">{t("Price per unit (₹/kg/month)", "ಪ್ರತಿ ಯೂನಿಟ್ ಬೆಲೆ")}</Label>
@@ -130,6 +144,8 @@ function AddStorage() {
                 step="0.5"
                 required
                 className="mt-1.5 h-12 text-base"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
               />
             </div>
           </div>
@@ -202,6 +218,8 @@ function AddStorage() {
                 required
                 placeholder="https://maps.google.com/..."
                 className="mt-1.5 h-12 text-base"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
               />
             </div>
             <div>
@@ -211,6 +229,8 @@ function AddStorage() {
                 required
                 placeholder={t("Street, City, Pincode", "ರಸ್ತೆ, ನಗರ, ಪಿನ್")}
                 className="mt-1.5 h-12 text-base"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
               />
             </div>
           </div>

@@ -27,14 +27,16 @@ import { cn } from "@/lib/utils";
 
 interface SearchParams {
   quantity?: string;
-  duration?: string;
+  startDate?: string;
+  endDate?: string;
   unit?: string;
 }
 
 export const Route = createFileRoute("/farmer/storage/$id")({
   validateSearch: (s: Record<string, unknown>): SearchParams => ({
     quantity: typeof s.quantity === "string" ? s.quantity : undefined,
-    duration: typeof s.duration === "string" ? s.duration : undefined,
+    startDate: typeof s.startDate === "string" ? s.startDate : undefined,
+    endDate: typeof s.endDate === "string" ? s.endDate : undefined,
     unit: typeof s.unit === "string" ? s.unit : undefined,
   }),
   head: () => ({ meta: [{ title: "Facility Profile — GrainGuard" }] }),
@@ -66,10 +68,14 @@ function StorageDetail() {
   const [activeImg, setActiveImg] = useState(0);
 
   useEffect(() => {
-    if (lockSeconds <= 0) return;
+    if (lockSeconds <= 0) {
+      alert(t("Your session timed out. Please restart your storage process.", "ನಿಮ್ಮ ಸೆಶನ್ ಅವಧಿ ಮೀರಿದೆ. ದಯವಿಟ್ಟು ನಿಮ್ಮ ಸಂಗ್ರಹಣಾ ಪ್ರಕ್ರಿಯೆಯನ್ನು ಮರುಪ್ರಾರಂಭಿಸಿ."));
+      navigate({ to: "/farmer" });
+      return;
+    }
     const t = setInterval(() => setLockSeconds((s) => Math.max(0, s - 1)), 1000);
     return () => clearInterval(t);
-  }, [lockSeconds]);
+  }, [lockSeconds, navigate]);
 
   if (!storage) {
     return (
@@ -95,8 +101,17 @@ function StorageDetail() {
   }
 
   const qty = Number(search.quantity) || 100;
-  const dur = Number(search.duration) || 1;
-  const total = storage.price * qty * dur;
+  
+  const calculateDays = () => {
+    if (!search.startDate || !search.endDate) return 30;
+    const s = new Date(search.startDate);
+    const e = new Date(search.endDate);
+    return Math.ceil(Math.abs(e.getTime() - s.getTime()) / (1000 * 60 * 60 * 24));
+  };
+  
+  const days = calculateDays();
+  const durMonths = Math.max(1, Math.round(days / 30));
+  const total = storage.price * qty * durMonths;
   const available = storage.capacity - storage.occupied;
   const occupiedPct = Math.round((storage.occupied / storage.capacity) * 100);
 
@@ -215,8 +230,16 @@ function StorageDetail() {
                       <BadgeCheck className="h-3 w-3" />
                       <span className="font-mono">OWN-{storage.id.toUpperCase()}-9421</span>
                     </div>
-                    <div className="flex items-center gap-1.5">
-                      <Phone className="h-3 w-3" /> +91 99999 00{storage.id.replace(/\D/g, "")}
+                    <div 
+                      className="group relative flex items-center gap-1.5"
+                    >
+                      <Phone className="h-3 w-3" /> 
+                      <span className="cursor-help blur-[4px] transition-all hover:blur-none select-none">
+                        +91 99999 00{storage.id.replace(/\D/g, "")}
+                      </span>
+                      <div className="absolute left-0 top-full z-10 mt-1 hidden w-48 rounded bg-background p-2 text-[10px] shadow-lg border border-border group-hover:block">
+                        {t("Contact GrainGuard Support to speak with the owner before booking.", "ಬುಕಿಂಗ್ ಮಾಡುವ ಮೊದಲು ಮಾಲೀಕರೊಂದಿಗೆ ಮಾತನಾಡಲು GrainGuard ಬೆಂಬಲವನ್ನು ಸಂಪರ್ಕಿಸಿ.")}
+                      </div>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <Building2 className="h-3 w-3" /> {storage.location} District, Karnataka
@@ -370,7 +393,7 @@ function StorageDetail() {
             <h3 className="font-semibold">{t("Booking Summary", "ಬುಕಿಂಗ್ ಸಾರಾಂಶ")}</h3>
             <div className="mt-4 space-y-2 text-sm">
               <Row label={t("Quantity", "ಪ್ರಮಾಣ")} value={`${qty} ${search.unit ?? "kg"}`} />
-              <Row label={t("Duration", "ಅವಧಿ")} value={`${dur} ${t("month(s)", "ತಿಂಗಳು")}`} />
+              <Row label={t("Duration", "ಅವಧಿ")} value={`${days} ${t("days", "ದಿನಗಳು")}`} />
               <Row
                 label={t("Rate", "ದರ")}
                 value={`₹${storage.price}/kg/${language === "en" ? "mo" : "ತಿ"}`}
@@ -391,7 +414,8 @@ function StorageDetail() {
                   search: {
                     id: storage.id,
                     quantity: String(qty),
-                    duration: String(dur),
+                    startDate: search.startDate,
+                    endDate: search.endDate,
                     unit: search.unit,
                   },
                 })
@@ -401,16 +425,16 @@ function StorageDetail() {
               {t("Proceed to Book", "ಬುಕ್ ಮಾಡಲು ಮುಂದುವರಿಯಿರಿ")}
             </Button>
             <Button
-              asChild
-              variant="outline"
               size="lg"
-              className="mt-2 h-12 w-full gap-2 text-base"
+              className="mt-2 h-12 w-full gap-2 text-base transition-all grayscale-[0.5] blur-[1.5px] hover:blur-none select-none"
+              disabled
             >
-              <a href="tel:+910000000000">
-                <Phone className="h-4 w-4" />
-                {t("Call Owner", "ಮಾಲೀಕರನ್ನು ಕರೆ ಮಾಡಿ")}
-              </a>
+              <Phone className="h-4 w-4" />
+              {t("Call Owner", "ಮಾಲೀಕರನ್ನು ಕರೆ ಮಾಡಿ")}
             </Button>
+            <p className="mt-2 text-center text-[10px] text-muted-foreground italic">
+              {t("Call active after confirmed booking.", "ಸ್ಥಿರಪಡಿಸಿದ ಬುಕಿಂಗ್ ನಂತರ ಕರೆ ಸಕ್ರಿಯವಾಗುತ್ತದೆ.")}
+            </p>
             <p className="mt-3 text-center text-xs text-muted-foreground">
               {t(
                 "Payment held in escrow until storage starts.",

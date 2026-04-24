@@ -10,19 +10,15 @@ export const Route = createFileRoute("/orders")({
 });
 
 function Orders() {
-  const { t, activeBooking } = useApp();
+  const { t, activeBookings } = useApp();
 
   // Build invoice list from real state only (no dummy data)
-  const invoices = activeBooking
-    ? [
-        {
-          id: `INV-${Date.now().toString(36).slice(-6).toUpperCase()}`,
-          date: new Date().toLocaleDateString(),
-          desc: `${activeBooking.storageName} — ${activeBooking.quantity}`,
-          location: activeBooking.location,
-        },
-      ]
-    : [];
+  const invoices = activeBookings.map((b, i) => ({
+    id: `INV-${(Date.now() + i).toString(36).slice(-6).toUpperCase()}`,
+    date: new Date().toLocaleDateString(),
+    desc: `${b.storageName} — ${b.quantity}`,
+    location: b.location,
+  }));
 
   return (
     <PageShell>

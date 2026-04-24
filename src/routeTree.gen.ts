@@ -9,26 +9,31 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as OwnerFacilityRouteImport } from './routes/owner-facility'
 import { Route as OrdersRouteImport } from './routes/orders'
 import { Route as MarketRouteImport } from './routes/market'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as KycRouteImport } from './routes/kyc'
 import { Route as HelpRouteImport } from './routes/help'
-import { Route as AboutRouteImport } from './routes/about'
+import { Route as FarmerStorageRouteImport } from './routes/farmer-storage'
+import { Route as FarmerDetailsRouteImport } from './routes/farmer-details'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as OwnerIndexRouteImport } from './routes/owner.index'
 import { Route as FarmerIndexRouteImport } from './routes/farmer.index'
+import { Route as OwnerStorageSuccessRouteImport } from './routes/owner.storage-success'
 import { Route as OwnerBookingsRouteImport } from './routes/owner.bookings'
 import { Route as OwnerAddRouteImport } from './routes/owner.add'
 import { Route as FarmerPaymentRouteImport } from './routes/farmer.payment'
+import { Route as FarmerInsightsRouteImport } from './routes/farmer.insights'
 import { Route as FarmerContractRouteImport } from './routes/farmer.contract'
+import { Route as FarmerAlertsRouteImport } from './routes/farmer.alerts'
 import { Route as FarmerActiveRouteImport } from './routes/farmer.active'
 import { Route as FarmerStorageIndexRouteImport } from './routes/farmer.storage.index'
 import { Route as FarmerStorageIdRouteImport } from './routes/farmer.storage.$id'
 
-const SettingsRoute = SettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
+const OwnerFacilityRoute = OwnerFacilityRouteImport.update({
+  id: '/owner-facility',
+  path: '/owner-facility',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OrdersRoute = OrdersRouteImport.update({
@@ -46,14 +51,24 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const KycRoute = KycRouteImport.update({
+  id: '/kyc',
+  path: '/kyc',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HelpRoute = HelpRouteImport.update({
   id: '/help',
   path: '/help',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AboutRoute = AboutRouteImport.update({
-  id: '/about',
-  path: '/about',
+const FarmerStorageRoute = FarmerStorageRouteImport.update({
+  id: '/farmer-storage',
+  path: '/farmer-storage',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FarmerDetailsRoute = FarmerDetailsRouteImport.update({
+  id: '/farmer-details',
+  path: '/farmer-details',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -71,6 +86,11 @@ const FarmerIndexRoute = FarmerIndexRouteImport.update({
   path: '/farmer/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OwnerStorageSuccessRoute = OwnerStorageSuccessRouteImport.update({
+  id: '/owner/storage-success',
+  path: '/owner/storage-success',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OwnerBookingsRoute = OwnerBookingsRouteImport.update({
   id: '/owner/bookings',
   path: '/owner/bookings',
@@ -86,9 +106,19 @@ const FarmerPaymentRoute = FarmerPaymentRouteImport.update({
   path: '/farmer/payment',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FarmerInsightsRoute = FarmerInsightsRouteImport.update({
+  id: '/farmer/insights',
+  path: '/farmer/insights',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FarmerContractRoute = FarmerContractRouteImport.update({
   id: '/farmer/contract',
   path: '/farmer/contract',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FarmerAlertsRoute = FarmerAlertsRouteImport.update({
+  id: '/farmer/alerts',
+  path: '/farmer/alerts',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FarmerActiveRoute = FarmerActiveRouteImport.update({
@@ -109,17 +139,22 @@ const FarmerStorageIdRoute = FarmerStorageIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
+  '/farmer-details': typeof FarmerDetailsRoute
+  '/farmer-storage': typeof FarmerStorageRoute
   '/help': typeof HelpRoute
+  '/kyc': typeof KycRoute
   '/login': typeof LoginRoute
   '/market': typeof MarketRoute
   '/orders': typeof OrdersRoute
-  '/settings': typeof SettingsRoute
+  '/owner-facility': typeof OwnerFacilityRoute
   '/farmer/active': typeof FarmerActiveRoute
+  '/farmer/alerts': typeof FarmerAlertsRoute
   '/farmer/contract': typeof FarmerContractRoute
+  '/farmer/insights': typeof FarmerInsightsRoute
   '/farmer/payment': typeof FarmerPaymentRoute
   '/owner/add': typeof OwnerAddRoute
   '/owner/bookings': typeof OwnerBookingsRoute
+  '/owner/storage-success': typeof OwnerStorageSuccessRoute
   '/farmer/': typeof FarmerIndexRoute
   '/owner/': typeof OwnerIndexRoute
   '/farmer/storage/$id': typeof FarmerStorageIdRoute
@@ -127,17 +162,22 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
+  '/farmer-details': typeof FarmerDetailsRoute
+  '/farmer-storage': typeof FarmerStorageRoute
   '/help': typeof HelpRoute
+  '/kyc': typeof KycRoute
   '/login': typeof LoginRoute
   '/market': typeof MarketRoute
   '/orders': typeof OrdersRoute
-  '/settings': typeof SettingsRoute
+  '/owner-facility': typeof OwnerFacilityRoute
   '/farmer/active': typeof FarmerActiveRoute
+  '/farmer/alerts': typeof FarmerAlertsRoute
   '/farmer/contract': typeof FarmerContractRoute
+  '/farmer/insights': typeof FarmerInsightsRoute
   '/farmer/payment': typeof FarmerPaymentRoute
   '/owner/add': typeof OwnerAddRoute
   '/owner/bookings': typeof OwnerBookingsRoute
+  '/owner/storage-success': typeof OwnerStorageSuccessRoute
   '/farmer': typeof FarmerIndexRoute
   '/owner': typeof OwnerIndexRoute
   '/farmer/storage/$id': typeof FarmerStorageIdRoute
@@ -146,17 +186,22 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
+  '/farmer-details': typeof FarmerDetailsRoute
+  '/farmer-storage': typeof FarmerStorageRoute
   '/help': typeof HelpRoute
+  '/kyc': typeof KycRoute
   '/login': typeof LoginRoute
   '/market': typeof MarketRoute
   '/orders': typeof OrdersRoute
-  '/settings': typeof SettingsRoute
+  '/owner-facility': typeof OwnerFacilityRoute
   '/farmer/active': typeof FarmerActiveRoute
+  '/farmer/alerts': typeof FarmerAlertsRoute
   '/farmer/contract': typeof FarmerContractRoute
+  '/farmer/insights': typeof FarmerInsightsRoute
   '/farmer/payment': typeof FarmerPaymentRoute
   '/owner/add': typeof OwnerAddRoute
   '/owner/bookings': typeof OwnerBookingsRoute
+  '/owner/storage-success': typeof OwnerStorageSuccessRoute
   '/farmer/': typeof FarmerIndexRoute
   '/owner/': typeof OwnerIndexRoute
   '/farmer/storage/$id': typeof FarmerStorageIdRoute
@@ -166,17 +211,22 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/about'
+    | '/farmer-details'
+    | '/farmer-storage'
     | '/help'
+    | '/kyc'
     | '/login'
     | '/market'
     | '/orders'
-    | '/settings'
+    | '/owner-facility'
     | '/farmer/active'
+    | '/farmer/alerts'
     | '/farmer/contract'
+    | '/farmer/insights'
     | '/farmer/payment'
     | '/owner/add'
     | '/owner/bookings'
+    | '/owner/storage-success'
     | '/farmer/'
     | '/owner/'
     | '/farmer/storage/$id'
@@ -184,17 +234,22 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/about'
+    | '/farmer-details'
+    | '/farmer-storage'
     | '/help'
+    | '/kyc'
     | '/login'
     | '/market'
     | '/orders'
-    | '/settings'
+    | '/owner-facility'
     | '/farmer/active'
+    | '/farmer/alerts'
     | '/farmer/contract'
+    | '/farmer/insights'
     | '/farmer/payment'
     | '/owner/add'
     | '/owner/bookings'
+    | '/owner/storage-success'
     | '/farmer'
     | '/owner'
     | '/farmer/storage/$id'
@@ -202,17 +257,22 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/about'
+    | '/farmer-details'
+    | '/farmer-storage'
     | '/help'
+    | '/kyc'
     | '/login'
     | '/market'
     | '/orders'
-    | '/settings'
+    | '/owner-facility'
     | '/farmer/active'
+    | '/farmer/alerts'
     | '/farmer/contract'
+    | '/farmer/insights'
     | '/farmer/payment'
     | '/owner/add'
     | '/owner/bookings'
+    | '/owner/storage-success'
     | '/farmer/'
     | '/owner/'
     | '/farmer/storage/$id'
@@ -221,17 +281,22 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AboutRoute: typeof AboutRoute
+  FarmerDetailsRoute: typeof FarmerDetailsRoute
+  FarmerStorageRoute: typeof FarmerStorageRoute
   HelpRoute: typeof HelpRoute
+  KycRoute: typeof KycRoute
   LoginRoute: typeof LoginRoute
   MarketRoute: typeof MarketRoute
   OrdersRoute: typeof OrdersRoute
-  SettingsRoute: typeof SettingsRoute
+  OwnerFacilityRoute: typeof OwnerFacilityRoute
   FarmerActiveRoute: typeof FarmerActiveRoute
+  FarmerAlertsRoute: typeof FarmerAlertsRoute
   FarmerContractRoute: typeof FarmerContractRoute
+  FarmerInsightsRoute: typeof FarmerInsightsRoute
   FarmerPaymentRoute: typeof FarmerPaymentRoute
   OwnerAddRoute: typeof OwnerAddRoute
   OwnerBookingsRoute: typeof OwnerBookingsRoute
+  OwnerStorageSuccessRoute: typeof OwnerStorageSuccessRoute
   FarmerIndexRoute: typeof FarmerIndexRoute
   OwnerIndexRoute: typeof OwnerIndexRoute
   FarmerStorageIdRoute: typeof FarmerStorageIdRoute
@@ -240,11 +305,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/settings': {
-      id: '/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof SettingsRouteImport
+    '/owner-facility': {
+      id: '/owner-facility'
+      path: '/owner-facility'
+      fullPath: '/owner-facility'
+      preLoaderRoute: typeof OwnerFacilityRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/orders': {
@@ -268,6 +333,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/kyc': {
+      id: '/kyc'
+      path: '/kyc'
+      fullPath: '/kyc'
+      preLoaderRoute: typeof KycRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/help': {
       id: '/help'
       path: '/help'
@@ -275,11 +347,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HelpRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/about': {
-      id: '/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof AboutRouteImport
+    '/farmer-storage': {
+      id: '/farmer-storage'
+      path: '/farmer-storage'
+      fullPath: '/farmer-storage'
+      preLoaderRoute: typeof FarmerStorageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/farmer-details': {
+      id: '/farmer-details'
+      path: '/farmer-details'
+      fullPath: '/farmer-details'
+      preLoaderRoute: typeof FarmerDetailsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -303,6 +382,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FarmerIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/owner/storage-success': {
+      id: '/owner/storage-success'
+      path: '/owner/storage-success'
+      fullPath: '/owner/storage-success'
+      preLoaderRoute: typeof OwnerStorageSuccessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/owner/bookings': {
       id: '/owner/bookings'
       path: '/owner/bookings'
@@ -324,11 +410,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FarmerPaymentRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/farmer/insights': {
+      id: '/farmer/insights'
+      path: '/farmer/insights'
+      fullPath: '/farmer/insights'
+      preLoaderRoute: typeof FarmerInsightsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/farmer/contract': {
       id: '/farmer/contract'
       path: '/farmer/contract'
       fullPath: '/farmer/contract'
       preLoaderRoute: typeof FarmerContractRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/farmer/alerts': {
+      id: '/farmer/alerts'
+      path: '/farmer/alerts'
+      fullPath: '/farmer/alerts'
+      preLoaderRoute: typeof FarmerAlertsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/farmer/active': {
@@ -357,17 +457,22 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AboutRoute: AboutRoute,
+  FarmerDetailsRoute: FarmerDetailsRoute,
+  FarmerStorageRoute: FarmerStorageRoute,
   HelpRoute: HelpRoute,
+  KycRoute: KycRoute,
   LoginRoute: LoginRoute,
   MarketRoute: MarketRoute,
   OrdersRoute: OrdersRoute,
-  SettingsRoute: SettingsRoute,
+  OwnerFacilityRoute: OwnerFacilityRoute,
   FarmerActiveRoute: FarmerActiveRoute,
+  FarmerAlertsRoute: FarmerAlertsRoute,
   FarmerContractRoute: FarmerContractRoute,
+  FarmerInsightsRoute: FarmerInsightsRoute,
   FarmerPaymentRoute: FarmerPaymentRoute,
   OwnerAddRoute: OwnerAddRoute,
   OwnerBookingsRoute: OwnerBookingsRoute,
+  OwnerStorageSuccessRoute: OwnerStorageSuccessRoute,
   FarmerIndexRoute: FarmerIndexRoute,
   OwnerIndexRoute: OwnerIndexRoute,
   FarmerStorageIdRoute: FarmerStorageIdRoute,

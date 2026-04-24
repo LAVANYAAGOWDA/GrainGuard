@@ -21,7 +21,8 @@ import { cn } from "@/lib/utils";
 interface SearchParams {
   id?: string;
   quantity?: string;
-  duration?: string;
+  startDate?: string;
+  endDate?: string;
   unit?: string;
 }
 
@@ -29,7 +30,8 @@ export const Route = createFileRoute("/farmer/contract")({
   validateSearch: (s: Record<string, unknown>): SearchParams => ({
     id: typeof s.id === "string" ? s.id : undefined,
     quantity: typeof s.quantity === "string" ? s.quantity : undefined,
-    duration: typeof s.duration === "string" ? s.duration : undefined,
+    startDate: typeof s.startDate === "string" ? s.startDate : undefined,
+    endDate: typeof s.endDate === "string" ? s.endDate : undefined,
     unit: typeof s.unit === "string" ? s.unit : undefined,
   }),
   head: () => ({ meta: [{ title: "Smart Contract — GrainGuard" }] }),
@@ -45,7 +47,16 @@ function SmartContract() {
 
   const storage = STORAGES.find((s) => s.id === search.id);
   const qty = Number(search.quantity) || 0;
-  const dur = Number(search.duration) || 1;
+  
+  const calculateDays = () => {
+    if (!search.startDate || !search.endDate) return 30;
+    const s = new Date(search.startDate);
+    const e = new Date(search.endDate);
+    return Math.ceil(Math.abs(e.getTime() - s.getTime()) / (1000 * 60 * 60 * 24));
+  };
+  
+  const days = calculateDays();
+  const durMonths = Math.max(1, Math.round(days / 30));
 
   if (!storage) {
     return (
@@ -60,7 +71,7 @@ function SmartContract() {
     );
   }
 
-  const total = storage.price * qty * dur;
+  const total = storage.price * qty * durMonths;
 
   const handleAgree = () => {
     const code = `GG-${Date.now().toString(36).slice(-5).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
@@ -71,7 +82,8 @@ function SmartContract() {
         search: {
           id: storage.id,
           quantity: String(qty),
-          duration: String(dur),
+          startDate: search.startDate,
+          endDate: search.endDate,
           unit: search.unit,
           ref: code,
         },
@@ -92,8 +104,8 @@ function SmartContract() {
       icon: Clock,
       title: t("Duration", "ಅವಧಿ"),
       body: t(
-        `Storage will be reserved for ${dur} month${dur > 1 ? "s" : ""} from the start date.`,
-        `ಪ್ರಾರಂಭದಿಂದ ${dur} ತಿಂಗಳ ಅವಧಿಗೆ ಸಂಗ್ರಹಣೆ ಕಾಯ್ದಿರಿಸಲಾಗುತ್ತದೆ.`,
+        `Storage will be reserved from ${search.startDate} to ${search.endDate} (${days} days).`,
+        `ಪ್ರಾರಂಭ ದಿನಾಂಕ ${search.startDate} ರಿಂದ ${search.endDate} ರವರೆಗೆ (${days} ದಿನಗಳು) ಸಂಗ್ರಹಣೆ ಕಾಯ್ದಿರಿಸಲಾಗುತ್ತದೆ.`,
       ),
     },
     {

@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { Wheat, Search, Package, Boxes, ShieldCheck, Sparkles, Truck } from "lucide-react";
+import { Wheat, Search, Package, Boxes, ShieldCheck, TrendingUp, BarChart3 } from "lucide-react";
 import { PageShell } from "@/components/PageShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,24 +23,53 @@ export const Route = createFileRoute("/farmer/")({
   component: FarmerDashboard,
 });
 
-const CROPS = [
-  { id: "rice", label: { en: "Rice", kn: "ಅಕ್ಕಿ" }, emoji: "🌾" },
-  { id: "wheat", label: { en: "Wheat", kn: "ಗೋಧಿ" }, emoji: "🌾" },
-  { id: "maize", label: { en: "Maize", kn: "ಮೆಕ್ಕೆ" }, emoji: "🌽" },
-  { id: "ragi", label: { en: "Ragi", kn: "ರಾಗಿ" }, emoji: "🌱" },
+export const CROPS = [
+  { id: "bajra", label: { en: "Bajra", kn: "ಬಾಜ್ರಾ" }, emoji: "🌾" },
+  { id: "barley", label: { en: "Barley", kn: "ಬಾರ್ಲಿ" }, emoji: "🌾" },
   { id: "jowar", label: { en: "Jowar", kn: "ಜೋಳ" }, emoji: "🌾" },
-  { id: "pulses", label: { en: "Pulses", kn: "ಬೇಳೆ" }, emoji: "🫘" },
+  { id: "maize", label: { en: "Maize", kn: "ಮೆಕ್ಕೆ" }, emoji: "🌽" },
+  { id: "paddy", label: { en: "Paddy", kn: "ಭತ್ತ" }, emoji: "🌾" },
+  { id: "ragi", label: { en: "Ragi", kn: "ರಾಗಿ" }, emoji: "🌱" },
+  { id: "wheat", label: { en: "Wheat", kn: "ಗೋಧಿ" }, emoji: "🌾" },
+  { id: "copra", label: { en: "Copra", kn: "ಕೊಬ್ಬರಿ" }, emoji: "🥥" },
+  { id: "groundnut", label: { en: "Groundnut", kn: "ಕಡಲೆಕಾಯಿ" }, emoji: "🥜" },
+  { id: "mustard", label: { en: "Mustard", kn: "ಸಾಸಿವೆ" }, emoji: "🌼" },
+  { id: "safflower", label: { en: "Safflower", kn: "ಕುಸುಬೆ" }, emoji: "🌻" },
+  { id: "sesamum", label: { en: "Sesamum", kn: "ಎಳ್ಳು" }, emoji: "🌱" },
+  { id: "soyabean", label: { en: "Soyabean", kn: "ಸೋಯಾಬೀನ್" }, emoji: "🫘" },
+  { id: "sunflower", label: { en: "Sunflower", kn: "ಸೂರ್ಯಕಾಂತಿ" }, emoji: "🌻" },
+  { id: "arhar", label: { en: "Arhar", kn: "ತೊಗರಿ" }, emoji: "🫘" },
+  { id: "bengal_gram", label: { en: "Bengal Gram", kn: "ಕಡಲೆ" }, emoji: "🫘" },
+  { id: "black_gram", label: { en: "Black Gram", kn: "ಉದ್ದು" }, emoji: "🫘" },
+  { id: "green_gram", label: { en: "Green Gram", kn: "ಹೆಸರುಬೇಳೆ" }, emoji: "🫘" },
 ];
 
 function FarmerDashboard() {
-  const { t, language, activeBooking } = useApp();
+  const { t, language, activeBookings } = useApp();
   const navigate = useNavigate();
-  const [crop, setCrop] = useState("");
+  const [crops, setCrops] = useState<string[]>([]);
   const [quantity, setQuantity] = useState("");
   const [unit, setUnit] = useState("kg");
-  const [duration, setDuration] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [dateError, setDateError] = useState("");
 
-  const canSubmit = crop && quantity && duration;
+  const validateDates = () => {
+    if (!startDate || !endDate) return false;
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const diffTime = Math.abs(end.getTime() - start.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays < 15) {
+      setDateError(t("Minimum storage duration is 15 days.", "ಕನಿಷ್ಠ ಸಂಗ್ರಹಣಾ ಅವಧಿ 15 ದಿನಗಳು."));
+      return false;
+    }
+    setDateError("");
+    return true;
+  };
+
+  const canSubmit = crops.length > 0 && quantity && startDate && endDate && !dateError;
 
   return (
     <PageShell>
@@ -61,7 +90,7 @@ function FarmerDashboard() {
               {t("Tell us what you need to store.", "ನೀವು ಏನನ್ನು ಸಂಗ್ರಹಿಸಬೇಕು ಎಂದು ತಿಳಿಸಿ.")}
             </p>
           </div>
-          {activeBooking && (
+          {activeBookings.length > 0 && (
             <Button asChild variant="outline">
               <Link to="/farmer/active">
                 <Package className="mr-2 h-4 w-4" />
@@ -83,19 +112,22 @@ function FarmerDashboard() {
               ),
             },
             {
-              icon: Sparkles,
-              title: t("AI-Matched Picks", "AI ಹೊಂದಿಕೆ"),
-              desc: t("Smart suggestions for your crop type.", "ನಿಮ್ಮ ಬೆಳೆಗೆ ಸ್ಮಾರ್ಟ್ ಸಲಹೆಗಳು."),
+              icon: Package,
+              title: t("Active Bookings Overview", "ಸಕ್ರಿಯ ಬುಕಿಂಗ್ ಅವಲೋಕನ"),
+              desc: t("Quickly view and manage your current storage.", "ನಿಮ್ಮ ಪ್ರಸ್ತುತ ಸಂಗ್ರಹಣೆಯನ್ನು ನಿರ್ವಹಿಸಿ."),
+              link: "/farmer/active"
             },
             {
-              icon: Truck,
-              title: t("Logistics Support", "ಸಾಗಣೆ ಬೆಂಬಲ"),
-              desc: t("Transport help if storage is far.", "ಸಂಗ್ರಹಣೆ ದೂರವಿದ್ದರೆ ಸಾಗಣೆ ಸಹಾಯ."),
+              icon: TrendingUp,
+              title: t("Dedicated Market Trends", "ಮಾರುಕಟ್ಟೆ ಪ್ರವೃತ್ತಿಗಳು"),
+              desc: t("Live price insights to maximize your profit.", "ಹೆಚ್ಚಿನ ಲಾಭಕ್ಕಾಗಿ ಲೈವ್ ಬೆಲೆ ಒಳನೋಟಗಳು."),
+              link: "/farmer/insights"
             },
           ].map((s) => (
-            <div
+            <Link
               key={s.title}
-              className="flex items-start gap-3 rounded-xl border border-border bg-card/80 p-4 backdrop-blur"
+              to={s.link || "#"}
+              className="flex items-start gap-3 rounded-xl border border-border bg-card/80 p-4 backdrop-blur transition-all hover:border-primary hover:bg-primary/5"
             >
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-soft">
                 <s.icon className="h-4 w-4 text-primary" />
@@ -104,7 +136,7 @@ function FarmerDashboard() {
                 <div className="text-sm font-semibold">{s.title}</div>
                 <div className="mt-0.5 text-xs text-muted-foreground">{s.desc}</div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
 
@@ -115,12 +147,16 @@ function FarmerDashboard() {
           </p>
           <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-6">
             {CROPS.map((c) => {
-              const active = crop === c.id;
+              const active = crops.includes(c.id);
               return (
                 <button
                   key={c.id}
                   type="button"
-                  onClick={() => setCrop(c.id)}
+                  onClick={() => {
+                    setCrops((prev) =>
+                      prev.includes(c.id) ? prev.filter((id) => id !== c.id) : [...prev, c.id]
+                    );
+                  }}
                   className={cn(
                     "flex flex-col items-center gap-2 rounded-xl border-2 p-4 transition-all",
                     active
@@ -144,8 +180,34 @@ function FarmerDashboard() {
           </div>
 
           <div className="mt-6 grid gap-4 md:grid-cols-3">
-            <div className="md:col-span-2">
-              <Label htmlFor="qty">{t("Quantity", "ಪ್ರಮಾಣ")}</Label>
+            <div className="md:col-span-1">
+              <Label htmlFor="start-date">{t("Start Date", "ಪ್ರಾರಂಭ ದಿನಾಂಕ")}</Label>
+              <Input
+                id="start-date"
+                type="date"
+                className="mt-1.5 h-12"
+                value={startDate}
+                onChange={(e) => {
+                  setStartDate(e.target.value);
+                  setTimeout(validateDates, 0);
+                }}
+              />
+            </div>
+            <div className="md:col-span-1">
+              <Label htmlFor="end-date">{t("End Date", "ಮುಕ್ತಾಯ ದಿನಾಂk")}</Label>
+              <Input
+                id="end-date"
+                type="date"
+                className="mt-1.5 h-12"
+                value={endDate}
+                onChange={(e) => {
+                  setEndDate(e.target.value);
+                  setTimeout(validateDates, 0);
+                }}
+              />
+            </div>
+            <div>
+              <Label htmlFor="dur">{t("Quantity", "ಪ್ರಮಾಣ")}</Label>
               <div className="relative mt-1.5 flex">
                 <Boxes className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
@@ -169,32 +231,24 @@ function FarmerDashboard() {
                 </Select>
               </div>
             </div>
-            <div>
-              <Label htmlFor="dur">{t("Duration", "ಅವಧಿ")}</Label>
-              <Select value={duration} onValueChange={setDuration}>
-                <SelectTrigger id="dur" className="mt-1.5 h-12 text-base">
-                  <SelectValue placeholder={t("Select duration", "ಅವಧಿ ಆಯ್ಕೆಮಾಡಿ")} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1">1 {t("month", "ತಿಂಗಳು")}</SelectItem>
-                  <SelectItem value="3">3 {t("months", "ತಿಂಗಳು")}</SelectItem>
-                  <SelectItem value="6">6 {t("months", "ತಿಂಗಳು")}</SelectItem>
-                  <SelectItem value="12">12 {t("months", "ತಿಂಗಳು")}</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
           </div>
+
+          {dateError && (
+            <p className="mt-2 text-sm font-medium text-destructive">{dateError}</p>
+          )}
 
           <Button
             size="lg"
             className="mt-6 h-12 w-full gap-2 text-base sm:w-auto"
             disabled={!canSubmit}
-            onClick={() =>
-              navigate({
-                to: "/farmer/storage",
-                search: { crop, quantity, duration, unit },
-              })
-            }
+            onClick={() => {
+              if (validateDates()) {
+                navigate({
+                  to: "/farmer/storage",
+                  search: { crop: crops.join(","), quantity, startDate, endDate, unit },
+                });
+              }
+            }}
           >
             <Search className="h-4 w-4" />
             {t("Find Storage", "ಸಂಗ್ರಹಣೆ ಹುಡುಕಿ")}
